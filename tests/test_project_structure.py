@@ -68,7 +68,7 @@ class TestProjectStructure:
         """Test that .env.example contains required placeholder."""
         env_example = project_root / ".env.example"
         content = env_example.read_text()
-        assert "RESUME_CLAUDE_API_KEY" in content, "RESUME_CLAUDE_API_KEY not found in .env.example"
+        assert "ANTHROPIC_API_KEY" in content, "ANTHROPIC_API_KEY not found in .env.example"
     
     def test_pyproject_toml_structure(self, project_root):
         """Test that pyproject.toml has correct structure."""

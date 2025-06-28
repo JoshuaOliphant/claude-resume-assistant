@@ -78,6 +78,6 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 ## Environment Setup
 - [x] .env.example file created
 - [ ] .env file created (user needs to copy and add API key)
-- [ ] RESUME_CLAUDE_API_KEY configured
+- [ ] ANTHROPIC_API_KEY configured
 - [x] Python version verified (>=3.11)
 - [x] uv installed and configured

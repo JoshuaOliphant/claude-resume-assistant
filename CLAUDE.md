@@ -63,3 +63,7 @@ claude_resume_assistant/
 - Focus on ATS optimization without sacrificing readability
 - Use standard section headings for compatibility
 - Test with various job descriptions to ensure robustness
+
+## Workflow Reminders
+
+- Check off tasks in the todo.md file as you finish them
