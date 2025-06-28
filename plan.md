@@ -4,6 +4,8 @@
 
 This plan breaks down the Resume Customizer application into small, testable chunks that build incrementally. Each step follows TDD principles: write failing tests first, implement minimal code to pass, then refactor.
 
+**ARCHITECTURAL UPDATE**: We're using Claude Code SDK with file system tools, which dramatically simplifies the implementation. Claude will handle file I/O, sub-agent orchestration, and content analysis directly.
+
 ## High-Level Architecture Breakdown
 
 ### Phase 1: CLI Application Foundation
@@ -17,20 +19,20 @@ This plan breaks down the Resume Customizer application into small, testable chu
    - Job description representation
    - Customization result model
 
-3. **File I/O Layer**
-   - Resume file reader
-   - Job description reader
-   - Output writer
+3. **File I/O Layer** (SIMPLIFIED - Claude handles this)
+   - ~~Resume file reader~~ Claude reads files
+   - ~~Job description reader~~ Claude reads files
+   - ~~Output writer~~ Claude writes files
 
 4. **Claude Code SDK Integration**
    - SDK setup and configuration
    - Basic prompt construction
    - Response handling
 
-5. **Customization Engine**
-   - Orchestrator prompt builder
-   - Sub-agent prompts
-   - Result extraction
+5. **Customization Engine** (SIMPLIFIED)
+   - Orchestrator prompt builder (includes sub-agents)
+   - ~~Sub-agent prompts~~ Handled in orchestrator prompt
+   - ~~Result extraction~~ Claude writes directly
 
 6. **CLI Interface**
    - Command structure
@@ -91,82 +93,81 @@ This plan breaks down the Resume Customizer application into small, testable chu
 
 ### Iteration 3: File I/O
 
-#### Step 3.1: Markdown Reader
-- Create MarkdownReader class
-- Implement file parsing
-- Add error handling
-- Test various markdown formats
+**NOTE: With Claude Code SDK, these steps are no longer needed as Claude handles file I/O directly**
 
-#### Step 3.2: Text File Reader
-- Create TextFileReader class
-- Implement plain text parsing
-- Add encoding detection
-- Test different encodings
+#### Step 3.1: Markdown Reader (NOT NEEDED)
+- ~~Create MarkdownReader class~~ Claude reads files
+- ~~Implement file parsing~~ Claude handles this
+- ~~Add error handling~~ Claude handles this
+- ~~Test various markdown formats~~ Claude handles this
 
-#### Step 3.3: Output Writer
-- Create OutputWriter class
-- Implement markdown generation
-- Add formatting preservation
-- Test output generation
+#### Step 3.2: Text File Reader (NOT APPLICABLE)
+- Not needed for markdown-only CLI tool
+
+#### Step 3.3: Output Writer (NOT NEEDED)
+- ~~Create OutputWriter class~~ Claude writes files
+- ~~Implement markdown generation~~ Claude handles this
+- ~~Add formatting preservation~~ Claude handles this
+- ~~Test output generation~~ Claude handles this
 
 ### Iteration 4: Claude Code SDK Setup
 
-#### Step 4.1: SDK Configuration
-- Create ClaudeClient wrapper
-- Implement connection setup
-- Add retry logic
-- Test SDK initialization
+#### Step 4.1: SDK Configuration (NEEDS REDO)
+- Create ClaudeClient wrapper using claude-code-sdk
+- Implement file system tools configuration
+- Configure ClaudeCodeOptions
+- Test SDK initialization with file operations
 
 #### Step 4.2: Basic Prompt Testing
-- Create simple prompt builder
-- Test SDK communication
-- Implement response parsing
-- Verify API integration
+- Test file reading capabilities
+- Test file writing capabilities
+- Verify tool usage tracking
+- Test error scenarios
 
 ### Iteration 5: Prompt Engineering
 
-#### Step 5.1: Orchestrator Prompt
-- Create OrchestratorPrompt class
-- Implement prompt template
-- Add dynamic sections
-- Test prompt generation
+#### Step 5.1: Orchestrator Prompt (SIMPLIFIED)
+- Create comprehensive prompt with sub-agent instructions
+- Include file paths for input/output
+- Define iterative refinement process
+- Test prompt effectiveness
 
-#### Step 5.2: Sub-Agent Prompts
-- Create prompt templates for each agent
-- Implement prompt composition
-- Add context injection
-- Test individual prompts
+#### Step 5.2: Sub-Agent Prompts (NOT NEEDED)
+- ~~Create prompt templates~~ Handled in orchestrator
+- ~~Implement prompt composition~~ Claude creates internally
+- ~~Add context injection~~ Claude handles this
+- ~~Test individual prompts~~ Not applicable
 
-#### Step 5.3: Result Extraction
-- Create ResultExtractor class
-- Implement parsing logic
-- Add validation
-- Test extraction accuracy
+#### Step 5.3: Result Extraction (NOT NEEDED)
+- ~~Create ResultExtractor class~~ Claude writes directly
+- ~~Implement parsing logic~~ Not needed
+- ~~Add validation~~ Claude validates output
+- ~~Test extraction accuracy~~ Test file output instead
 
 ### Iteration 6: Core Customization Engine
 
-#### Step 6.1: Resume Analyzer
-- Create ResumeAnalyzer class
-- Implement section detection
-- Add skill extraction
-- Test analysis accuracy
+#### Step 6.1: Resume Analyzer (NOT NEEDED)
+- ~~Create ResumeAnalyzer class~~ Claude analyzes
+- ~~Implement section detection~~ Claude handles this
+- ~~Add skill extraction~~ Claude handles this
+- ~~Test analysis accuracy~~ Test via output quality
 
-#### Step 6.2: Job Matcher
-- Create JobMatcher class
-- Implement requirement matching
-- Add gap analysis
-- Test matching logic
+#### Step 6.2: Job Matcher (NOT NEEDED)
+- ~~Create JobMatcher class~~ Claude matches
+- ~~Implement requirement matching~~ Claude handles this
+- ~~Add gap analysis~~ Claude handles this
+- ~~Test matching logic~~ Test via output quality
 
-#### Step 6.3: Content Optimizer
-- Create ContentOptimizer class
-- Implement rewriting logic
-- Add keyword integration
-- Test optimization quality
+#### Step 6.3: Content Optimizer (NOT NEEDED)
+- ~~Create ContentOptimizer class~~ Claude optimizes
+- ~~Implement rewriting logic~~ Claude handles this
+- ~~Add keyword integration~~ Claude handles this
+- ~~Test optimization quality~~ Test via output quality
 
-#### Step 6.4: Customizer Integration
-- Create ResumeCustomizer class
-- Wire together components
-- Implement orchestration
+#### Step 6.4: Customizer Integration (SIMPLIFIED)
+- Create simple ResumeCustomizer class
+- Call Claude Code SDK with orchestrator prompt
+- Monitor progress via message stream
 - Test full customization flow
 
 ### Iteration 7: CLI Interface
@@ -413,99 +414,86 @@ Create an OutputWriter for saving customized resumes. Follow TDD:
 Test file writing with various scenarios and permissions.
 ```
 
-### Prompt 9: Claude Client Wrapper
+### Prompt 9: Claude Client Wrapper (UPDATED FOR CLAUDE CODE SDK)
 
 ```text
-Create a wrapper around Claude Code SDK for easier testing. Feel free to browse the web for more information about the Claude SDK, these are good information sources:
-
-- "https://github.com/anthropics/claude-code-sdk-python/tree/main"
-- "https://docs.anthropic.com/en/docs/claude-code/sdk#python"
-
-
- Follow TDD:
+Create a wrapper around Claude Code SDK with file system tools. Follow TDD:
 
 1. Write tests for a ClaudeClient class that:
-   - Initializes with API key from settings
-   - Sends prompts and receives responses
-   - Handles API errors gracefully
-   - Implements retry logic
-   - Tracks token usage
-   - Tracks cost
-   - Supports timeout configuration
+   - Uses claude-code-sdk's query() function
+   - Configures file system tools (Read, Write)
+   - Sends orchestrator prompt with file paths
+   - Monitors progress through message stream
+   - Handles SDK-specific errors
+   - Tracks tool usage
 
 2. Implement in src/resume_customizer/core/claude_client.py
-3. Create async query method
-4. Add retry decorator
-5. Implement error handling
-6. Add response parsing
+3. Create async customize_resume() method
+4. Configure ClaudeCodeOptions with tools
+5. Process message stream
+6. Log tool usage for visibility
 
-Mock the SDK for testing and verify error handling.
+Note: Claude Code SDK handles retries internally. Token tracking not available.
+Mock the query() function for testing.
 ```
 
-### Prompt 10: Orchestrator Prompt Builder
+### Prompt 10: Orchestrator Prompt Builder (UPDATED)
 
 ```text
-Build the orchestrator prompt generator. Follow TDD:
+Build the orchestrator prompt that includes sub-agent instructions. Follow TDD:
 
-1. Write tests for an OrchestratorPromptBuilder that:
-   - Creates structured prompts for Claude
-   - Includes resume and job description
-   - Defines sub-agent roles
+1. Write tests for a build_orchestrator_prompt() function that:
+   - Creates comprehensive prompt for Claude Code
+   - Includes file paths for resume and job description
+   - Embeds sub-agent roles within the prompt
    - Sets truthfulness constraints
-   - Specifies output format
-   - Adds evaluation criteria
+   - Defines iterative refinement process
+   - Specifies output file path
 
 2. Implement in src/resume_customizer/core/prompts.py
-3. Create build_prompt() method
-4. Add template management
-5. Implement variable substitution
-6. Create prompt validation
+3. Include orchestrator-workers pattern in prompt
+4. Add instructions for multiple iterations
+5. Specify evaluation criteria
+6. Include ATS optimization guidelines
 
-Test prompt generation with various inputs.
+Test that prompt contains all necessary instructions.
 ```
 
-### Prompt 11: Result Extractor
+### Prompt 11: Result Extractor (NO LONGER NEEDED)
 
 ```text
-Create a ResultExtractor to parse Claude's responses. Follow TDD:
+NO LONGER NEEDED - Claude Code SDK writes output directly to files.
 
-1. Write tests for a ResultExtractor class that:
-   - Extracts customized resume from response
-   - Parses change summary
-   - Identifies keywords added
-   - Extracts match score
-   - Handles malformed responses
-   - Validates extracted content
+Previously this would extract results from API responses, but with Claude Code SDK:
+- Claude writes the customized resume directly to the output file
+- No parsing or extraction needed
+- Success is determined by file existence and validity
+- Progress is monitored through tool usage messages
 
-2. Implement in src/resume_customizer/core/extractors.py
-3. Add extract_result() method
-4. Create parsing strategies
-5. Implement validation logic
-6. Add fallback handling
-
-Test with various response formats and edge cases.
+Skip this step entirely.
 ```
 
-### Prompt 12: Resume Customizer Core
+### Prompt 12: Resume Customizer Core (SIMPLIFIED)
 
 ```text
-Implement the main ResumeCustomizer class. Follow TDD:
+Implement the simplified ResumeCustomizer class. Follow TDD:
 
 1. Write tests for ResumeCustomizer that:
-   - Orchestrates the full customization flow
-   - Loads resume and job description
-   - Builds and sends prompts
-   - Extracts and validates results
+   - Validates input file paths exist
+   - Calls ClaudeClient with file paths
+   - Monitors progress through callbacks
+   - Verifies output file creation
    - Handles errors gracefully
-   - Supports iteration configuration
 
 2. Implement in src/resume_customizer/core/customizer.py
-3. Create customize() method
-4. Wire together all components
-5. Add progress callbacks
-6. Implement error recovery
+3. Create customize() method that:
+   - Validates inputs
+   - Builds orchestrator prompt
+   - Calls Claude Code SDK
+   - Reports progress
+4. Add success verification
 
-Test the complete customization flow end-to-end.
+Test the complete flow with mocked Claude responses.
 ```
 
 ### Prompt 13: CLI Implementation
@@ -628,10 +616,32 @@ Ensure the application is production-ready.
 
 1. **Foundation** (Steps 1-3): Project setup, configuration, logging
 2. **Models** (Steps 4-6): Domain models for data representation
-3. **I/O** (Steps 7-8): File reading and writing
+3. **I/O** (Steps 7-8): ~~File reading and writing~~ NOT NEEDED - Claude handles
 4. **Claude Integration** (Steps 9-11): SDK wrapper and prompt handling
-5. **Core Logic** (Step 12): Main customization engine
+5. **Core Logic** (Step 12): Main customization engine - SIMPLIFIED
 6. **CLI** (Steps 13-14): Command-line interface
 7. **Polish** (Steps 15-17): Error handling, testing, documentation
 
 Each step builds on previous ones, ensuring no orphaned code and continuous integration of components.
+
+## Architectural Changes Summary
+
+By using Claude Code SDK with file system tools:
+
+1. **Eliminated Components**:
+   - File readers (Claude reads files)
+   - File writers (Claude writes files)
+   - Result extractors (Claude writes directly)
+   - Sub-agent implementations (handled in prompt)
+   - Resume analyzer, job matcher, content optimizer (Claude does this)
+
+2. **Simplified Components**:
+   - ClaudeClient: Just configures SDK and monitors progress
+   - Orchestrator prompt: Includes all sub-agent instructions
+   - ResumeCustomizer: Validates inputs and calls Claude
+
+3. **Benefits**:
+   - ~60% less code to write and maintain
+   - More capable (future URL fetching, MCP servers)
+   - Better results (Claude has full file context)
+   - Simpler testing (fewer components)

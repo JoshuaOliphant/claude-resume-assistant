@@ -1,54 +1,67 @@
-# ABOUTME: Test suite for the ClaudeClient wrapper class
-# ABOUTME: Verifies SDK initialization, API calls, and error handling
+# ABOUTME: Test suite for the ClaudeClient wrapper using Claude Code SDK
+# ABOUTME: Verifies file operations, message processing, and error handling
 
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from datetime import datetime
-import time
+from pathlib import Path
+import tempfile
+import os
 
-from resume_customizer.core.claude_client import (
-    ClaudeClient, ClaudeAPIError, ClaudeRateLimitError,
-    ClaudeTimeoutError, ClaudeResponse
-)
+from resume_customizer.core.claude_client import ClaudeClient
 from resume_customizer.config import Settings
+from claude_code_sdk import ClaudeCodeOptions
 
 
 class TestClaudeClient:
-    """Test suite for ClaudeClient class."""
+    """Test suite for ClaudeClient class using Claude Code SDK."""
     
     @pytest.fixture
     def settings(self):
         """Create test settings."""
         return Settings(
             claude_api_key="test-api-key-123",
-            max_retries=3,
-            retry_delay=0.1,
-            timeout=30
+            max_iterations=3
         )
     
     @pytest.fixture
-    def mock_anthropic(self):
-        """Mock the Anthropic SDK."""
-        with patch('resume_customizer.core.claude_client.AsyncAnthropic') as mock_async:
-            with patch('resume_customizer.core.claude_client.Anthropic') as mock_sync:
-                yield mock_async, mock_sync
+    def temp_files(self):
+        """Create temporary test files."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test resume file
+            resume_path = Path(tmpdir) / "test_resume.md"
+            resume_path.write_text("# John Doe\n\n## Experience\n- Software Engineer")
+            
+            # Create test job description file
+            job_path = Path(tmpdir) / "test_job.md"
+            job_path.write_text("# Senior Software Engineer\n\nRequired: Python, AWS")
+            
+            # Output path
+            output_path = Path(tmpdir) / "customized_resume.md"
+            
+            yield {
+                "resume": str(resume_path),
+                "job": str(job_path),
+                "output": str(output_path),
+                "tmpdir": tmpdir
+            }
     
-    def test_initialization_with_api_key(self, settings, mock_anthropic):
-        """Test client initialization with API key."""
-        mock_async, mock_sync = mock_anthropic
+    @pytest.fixture
+    def mock_query(self):
+        """Mock the claude_code_sdk.query function."""
+        with patch('resume_customizer.core.claude_client.query') as mock:
+            yield mock
+    
+    def test_initialization(self, settings):
+        """Test client initialization with settings."""
         client = ClaudeClient(settings)
         
-        # Verify SDK was initialized with correct API key
-        mock_async.assert_called_once_with(api_key=settings.claude_api_key)
-        mock_sync.assert_called_once_with(api_key=settings.claude_api_key)
         assert client.settings == settings
-        assert client.total_tokens == 0
-        assert client.total_cost == 0.0
+        assert client.settings.claude_api_key is not None
+        assert len(client.settings.claude_api_key) > 0
     
-    def test_initialization_without_api_key(self, mock_anthropic):
+    def test_initialization_without_api_key(self):
         """Test initialization fails without API key."""
-        # Create a mock settings object with empty API key
         mock_settings = Mock()
         mock_settings.claude_api_key = ""
         
@@ -56,336 +69,288 @@ class TestClaudeClient:
             ClaudeClient(mock_settings)
     
     @pytest.mark.asyncio
-    async def test_query_success(self, settings, mock_anthropic):
-        """Test successful API query."""
-        mock_async, mock_sync = mock_anthropic
+    async def test_customize_resume_success(self, settings, temp_files, mock_query):
+        """Test successful resume customization."""
+        # Create mock messages that simulate Claude's file operations
+        # Use simple mock objects since we're just testing message processing
+        # Create content blocks with proper attributes
+        text_block1 = Mock()
+        text_block1.text = "I'll help you customize your resume. Let me read the files first."
+        text_block1.name = None
         
-        # Setup mock response
-        mock_response = Mock()
-        mock_response.content = [Mock(text="This is the customized resume.")]
-        mock_response.usage = Mock(input_tokens=100, output_tokens=50)
+        tool_block1 = Mock()
+        tool_block1.name = "Read"
+        tool_block1.text = None
+        tool_block1.input = {"path": temp_files["resume"]}
         
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(return_value=mock_response)
-        mock_async.return_value = mock_client_instance
+        text_block2 = Mock()
+        text_block2.text = "File read successfully"
+        text_block2.name = None
         
-        client = ClaudeClient(settings)
+        tool_block2 = Mock()
+        tool_block2.name = "Read"
+        tool_block2.text = None
+        tool_block2.input = {"path": temp_files["job"]}
         
-        # Make query
-        response = await client.query("Test prompt")
+        text_block3 = Mock()
+        text_block3.text = "File read successfully"
+        text_block3.name = None
         
-        # Verify response
-        assert response.content == "This is the customized resume."
-        assert response.input_tokens == 100
-        assert response.output_tokens == 50
-        assert response.total_tokens == 150
-        assert client.total_tokens == 150
+        text_block4 = Mock()
+        text_block4.text = "Analyzing job requirements and customizing resume..."
+        text_block4.name = None
         
-        # Verify API call
-        mock_client_instance.messages.create.assert_called_once_with(
-            model=settings.model,
-            messages=[{"role": "user", "content": "Test prompt"}],
-            max_tokens=settings.max_tokens,
-            temperature=settings.temperature
-        )
-    
-    @pytest.mark.asyncio
-    async def test_query_with_system_prompt(self, settings, mock_anthropic):
-        """Test query with system prompt."""
-        mock_async, mock_sync = mock_anthropic
+        tool_block3 = Mock()
+        tool_block3.name = "Write"
+        tool_block3.text = None
+        tool_block3.input = {
+            "path": temp_files["output"],
+            "content": "# John Doe\n\n## Experience\n- Senior Software Engineer with Python and AWS"
+        }
         
-        mock_response = Mock()
-        mock_response.content = [Mock(text="Response with system context.")]
-        mock_response.usage = Mock(input_tokens=120, output_tokens=60)
+        text_block5 = Mock()
+        text_block5.text = "File written successfully"
+        text_block5.name = None
         
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(return_value=mock_response)
-        mock_async.return_value = mock_client_instance
+        text_block6 = Mock()
+        text_block6.text = "Resume customization completed successfully!"
+        text_block6.name = None
         
-        client = ClaudeClient(settings)
+        messages = [
+            Mock(content=[text_block1]),
+            Mock(content=[tool_block1]),
+            Mock(content=[text_block2]),
+            Mock(content=[tool_block2]),
+            Mock(content=[text_block3]),
+            Mock(content=[text_block4]),
+            Mock(content=[tool_block3]),
+            Mock(content=[text_block5]),
+            Mock(content=[text_block6])
+        ]
         
-        # Make query with system prompt
-        response = await client.query(
-            "User prompt",
-            system_prompt="You are a helpful assistant."
-        )
+        # Mock query to return our messages
+        async def mock_query_generator(*args, **kwargs):
+            for msg in messages:
+                yield msg
         
-        # Verify API call includes system prompt
-        mock_client_instance.messages.create.assert_called_once_with(
-            model=settings.model,
-            messages=[{"role": "user", "content": "User prompt"}],
-            system="You are a helpful assistant.",
-            max_tokens=settings.max_tokens,
-            temperature=settings.temperature
-        )
-    
-    @pytest.mark.asyncio
-    async def test_retry_on_rate_limit(self, settings, mock_anthropic):
-        """Test retry logic on rate limit errors."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock to fail twice then succeed
-        mock_response = Mock()
-        mock_response.content = [Mock(text="Success after retries.")]
-        mock_response.usage = Mock(input_tokens=100, output_tokens=50)
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        
-        # Create a side effect that fails twice then succeeds
-        rate_limit_error = Exception("Rate limit exceeded")
-        rate_limit_error.status_code = 429
-        
-        mock_client_instance.messages.create = AsyncMock(
-            side_effect=[rate_limit_error, rate_limit_error, mock_response]
-        )
-        mock_async.return_value = mock_client_instance
+        mock_query.return_value = mock_query_generator()
         
         client = ClaudeClient(settings)
         
-        # Make query - should retry and eventually succeed
-        start_time = time.time()
-        response = await client.query("Test prompt")
-        elapsed_time = time.time() - start_time
+        # Track progress messages
+        progress_messages = []
+        def progress_callback(msg):
+            progress_messages.append(msg)
         
-        # Verify response
-        assert response.content == "Success after retries."
-        assert mock_client_instance.messages.create.call_count == 3
-        # Verify delays were applied (should be at least 0.2s for two retries)
-        assert elapsed_time >= 0.2
-    
-    @pytest.mark.asyncio
-    async def test_max_retries_exceeded(self, settings, mock_anthropic):
-        """Test that max retries limit is respected."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock to always fail
-        rate_limit_error = Exception("Rate limit exceeded")
-        rate_limit_error.status_code = 429
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(side_effect=rate_limit_error)
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make query - should fail after max retries
-        with pytest.raises(ClaudeRateLimitError):
-            await client.query("Test prompt")
-        
-        # Verify retry count
-        assert mock_client_instance.messages.create.call_count == settings.max_retries + 1
-    
-    @pytest.mark.asyncio
-    async def test_timeout_handling(self, settings, mock_anthropic):
-        """Test timeout handling."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock to timeout
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(
-            side_effect=asyncio.TimeoutError()
-        )
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make query - should raise timeout error
-        with pytest.raises(ClaudeTimeoutError):
-            await client.query("Test prompt")
-    
-    @pytest.mark.asyncio
-    async def test_api_error_handling(self, settings, mock_anthropic):
-        """Test handling of general API errors."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock to raise API error
-        api_error = Exception("Invalid request")
-        api_error.status_code = 400
-        api_error.message = "Invalid request format"
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(side_effect=api_error)
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make query - should raise API error
-        with pytest.raises(ClaudeAPIError) as exc_info:
-            await client.query("Test prompt")
-        
-        assert "Invalid request" in str(exc_info.value)
-    
-    def test_cost_calculation(self, settings, mock_anthropic):
-        """Test token cost calculation."""
-        mock_async, mock_sync = mock_anthropic
-        client = ClaudeClient(settings)
-        
-        # Test cost calculation for different models
-        cost = client._calculate_cost(1000, 500, "claude-3-opus-20240229")
-        assert cost == pytest.approx(0.0525)  # $15/$75 per million tokens
-        
-        cost = client._calculate_cost(1000, 500, "claude-3-sonnet-20240229")
-        assert cost == pytest.approx(0.0105)  # $3/$15 per million tokens
-        
-        cost = client._calculate_cost(1000, 500, "claude-3-haiku-20240307")
-        assert cost == pytest.approx(0.000875)  # $0.25/$1.25 per million tokens
-    
-    @pytest.mark.asyncio
-    async def test_token_and_cost_tracking(self, settings, mock_anthropic):
-        """Test cumulative token and cost tracking."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock responses
-        mock_response1 = Mock()
-        mock_response1.content = [Mock(text="First response.")]
-        mock_response1.usage = Mock(input_tokens=100, output_tokens=50)
-        
-        mock_response2 = Mock()
-        mock_response2.content = [Mock(text="Second response.")]
-        mock_response2.usage = Mock(input_tokens=150, output_tokens=75)
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(
-            side_effect=[mock_response1, mock_response2]
-        )
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make first query
-        await client.query("First prompt")
-        assert client.total_tokens == 150
-        assert client.total_cost > 0
-        
-        # Make second query
-        await client.query("Second prompt")
-        assert client.total_tokens == 375  # 150 + 225
-        assert client.total_cost > 0
-    
-    def test_get_usage_stats(self, settings, mock_anthropic):
-        """Test usage statistics retrieval."""
-        mock_async, mock_sync = mock_anthropic
-        client = ClaudeClient(settings)
-        client.total_tokens = 1000
-        client.total_cost = 0.015
-        
-        stats = client.get_usage_stats()
-        
-        assert stats["total_tokens"] == 1000
-        assert stats["total_cost"] == 0.015
-        assert stats["model"] == settings.model
-        assert "timestamp" in stats
-    
-    @pytest.mark.asyncio
-    async def test_empty_response_handling(self, settings, mock_anthropic):
-        """Test handling of empty responses."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock with empty response
-        mock_response = Mock()
-        mock_response.content = []
-        mock_response.usage = Mock(input_tokens=100, output_tokens=0)
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(return_value=mock_response)
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make query - should handle empty response
-        with pytest.raises(ClaudeAPIError, match="Empty response"):
-            await client.query("Test prompt")
-    
-    @pytest.mark.asyncio
-    async def test_malformed_response_handling(self, settings, mock_anthropic):
-        """Test handling of malformed responses."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock with malformed response
-        mock_response = Mock()
-        mock_response.content = None
-        mock_response.usage = Mock(input_tokens=100, output_tokens=50)
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(return_value=mock_response)
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make query - should handle malformed response
-        with pytest.raises(ClaudeAPIError, match="Malformed response"):
-            await client.query("Test prompt")
-    
-    @pytest.mark.asyncio
-    async def test_concurrent_queries(self, settings, mock_anthropic):
-        """Test handling of concurrent queries."""
-        mock_async, mock_sync = mock_anthropic
-        
-        # Setup mock responses
-        mock_response = Mock()
-        mock_response.content = [Mock(text="Concurrent response.")]
-        mock_response.usage = Mock(input_tokens=100, output_tokens=50)
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(return_value=mock_response)
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Make concurrent queries
-        tasks = [client.query(f"Prompt {i}") for i in range(5)]
-        responses = await asyncio.gather(*tasks)
-        
-        # Verify all queries completed
-        assert len(responses) == 5
-        assert all(r.content == "Concurrent response." for r in responses)
-        assert client.total_tokens == 750  # 150 tokens * 5 queries
-    
-    def test_reset_usage_stats(self, settings, mock_anthropic):
-        """Test resetting usage statistics."""
-        mock_async, mock_sync = mock_anthropic
-        client = ClaudeClient(settings)
-        client.total_tokens = 1000
-        client.total_cost = 0.015
-        
-        client.reset_usage_stats()
-        
-        assert client.total_tokens == 0
-        assert client.total_cost == 0.0
-    
-    @pytest.mark.asyncio
-    async def test_custom_model_override(self, settings, mock_anthropic):
-        """Test using a custom model for specific queries."""
-        mock_async, mock_sync = mock_anthropic
-        
-        mock_response = Mock()
-        mock_response.content = [Mock(text="Custom model response.")]
-        mock_response.usage = Mock(input_tokens=100, output_tokens=50)
-        
-        mock_client_instance = Mock()
-        mock_client_instance.messages = Mock()
-        mock_client_instance.messages.create = AsyncMock(return_value=mock_response)
-        mock_async.return_value = mock_client_instance
-        
-        client = ClaudeClient(settings)
-        
-        # Query with custom model
-        response = await client.query(
-            "Test prompt",
-            model="claude-3-haiku-20240307"
+        # Run customization
+        await client.customize_resume(
+            resume_path=temp_files["resume"],
+            job_description_path=temp_files["job"],
+            output_path=temp_files["output"],
+            progress_callback=progress_callback
         )
         
-        # Verify custom model was used
-        mock_client_instance.messages.create.assert_called_once()
-        call_kwargs = mock_client_instance.messages.create.call_args.kwargs
-        assert call_kwargs["model"] == "claude-3-haiku-20240307"
+        # Verify query was called correctly
+        mock_query.assert_called_once()
+        call_args = mock_query.call_args
+        
+        # Check prompt contains file paths
+        prompt = call_args[0][0]  # First positional argument
+        assert temp_files["resume"] in prompt
+        assert temp_files["job"] in prompt
+        assert temp_files["output"] in prompt
+        
+        # Check ClaudeCodeOptions
+        options = call_args[1]["options"]
+        assert isinstance(options, ClaudeCodeOptions)
+        assert "Read" in options.allowed_tools
+        assert "Write" in options.allowed_tools
+        assert options.max_turns == 1
+        
+        # Check progress messages
+        assert len(progress_messages) > 0
+        assert any("read" in msg.lower() for msg in progress_messages)
+        assert any("write" in msg.lower() for msg in progress_messages)
+    
+    @pytest.mark.asyncio
+    async def test_file_validation(self, settings, temp_files):
+        """Test that file paths are validated before calling Claude."""
+        client = ClaudeClient(settings)
+        
+        # Test with non-existent resume file
+        with pytest.raises(FileNotFoundError, match="Resume file not found"):
+            await client.customize_resume(
+                resume_path="/nonexistent/resume.md",
+                job_description_path=temp_files["job"],
+                output_path=temp_files["output"]
+            )
+        
+        # Test with non-existent job description file
+        with pytest.raises(FileNotFoundError, match="Job description file not found"):
+            await client.customize_resume(
+                resume_path=temp_files["resume"],
+                job_description_path="/nonexistent/job.md",
+                output_path=temp_files["output"]
+            )
+    
+    @pytest.mark.asyncio
+    async def test_output_directory_creation(self, settings, temp_files, mock_query):
+        """Test that output directory is created if it doesn't exist."""
+        # Create a nested output path
+        output_path = os.path.join(temp_files["tmpdir"], "nested", "dir", "output.md")
+        
+        # Mock successful execution
+        async def mock_query_generator(*args, **kwargs):
+            yield Mock(content=[Mock(text="Done")])
+        
+        mock_query.return_value = mock_query_generator()
+        
+        client = ClaudeClient(settings)
+        
+        await client.customize_resume(
+            resume_path=temp_files["resume"],
+            job_description_path=temp_files["job"],
+            output_path=output_path
+        )
+        
+        # Verify directory was created
+        assert Path(output_path).parent.exists()
+    
+    @pytest.mark.asyncio
+    async def test_tool_usage_tracking(self, settings, temp_files, mock_query):
+        """Test that tool usage is tracked and reported."""
+        # Create proper mock tool blocks
+        tool1 = Mock()
+        tool1.name = "Read"
+        tool1.text = None
+        tool1.input = {"path": "file1.md"}
+        
+        tool2 = Mock()
+        tool2.name = "Read"
+        tool2.text = None
+        tool2.input = {"path": "file2.md"}
+        
+        tool3 = Mock()
+        tool3.name = "Write"
+        tool3.text = None
+        tool3.input = {"path": "output.md", "content": "test"}
+        
+        messages = [
+            Mock(content=[tool1]),
+            Mock(content=[tool2]),
+            Mock(content=[tool3])
+        ]
+        
+        async def mock_query_generator(*args, **kwargs):
+            for msg in messages:
+                yield msg
+        
+        mock_query.return_value = mock_query_generator()
+        
+        client = ClaudeClient(settings)
+        
+        tool_usage = []
+        def progress_callback(msg):
+            if "Tool:" in msg:
+                tool_usage.append(msg)
+        
+        await client.customize_resume(
+            resume_path=temp_files["resume"],
+            job_description_path=temp_files["job"],
+            output_path=temp_files["output"],
+            progress_callback=progress_callback
+        )
+        
+        # Should track 2 reads and 1 write
+        assert len(tool_usage) == 3
+        assert sum(1 for msg in tool_usage if "Read" in msg) == 2
+        assert sum(1 for msg in tool_usage if "Write" in msg) == 1
+    
+    @pytest.mark.asyncio
+    async def test_error_handling(self, settings, temp_files, mock_query):
+        """Test error handling during Claude execution."""
+        # Mock an error during execution
+        async def mock_query_generator(*args, **kwargs):
+            yield Mock(content=[Mock(text="Starting...")])
+            raise Exception("Claude API error")
+        
+        mock_query.return_value = mock_query_generator()
+        
+        client = ClaudeClient(settings)
+        
+        with pytest.raises(Exception, match="Claude API error"):
+            await client.customize_resume(
+                resume_path=temp_files["resume"],
+                job_description_path=temp_files["job"],
+                output_path=temp_files["output"]
+            )
+    
+    @pytest.mark.asyncio
+    async def test_progress_callback_optional(self, settings, temp_files, mock_query):
+        """Test that progress callback is optional."""
+        async def mock_query_generator(*args, **kwargs):
+            yield Mock(content=[Mock(text="Done")])
+        
+        mock_query.return_value = mock_query_generator()
+        
+        client = ClaudeClient(settings)
+        
+        # Should not raise error without progress callback
+        await client.customize_resume(
+            resume_path=temp_files["resume"],
+            job_description_path=temp_files["job"],
+            output_path=temp_files["output"]
+        )
+    
+    def test_build_orchestrator_prompt(self, settings, temp_files):
+        """Test orchestrator prompt building."""
+        client = ClaudeClient(settings)
+        
+        prompt = client._build_orchestrator_prompt(
+            resume_path=temp_files["resume"],
+            job_description_path=temp_files["job"],
+            output_path=temp_files["output"]
+        )
+        
+        # Verify prompt contains necessary elements
+        assert "orchestrator" in prompt.lower()
+        assert "sub-agent" in prompt.lower()
+        assert temp_files["resume"] in prompt
+        assert temp_files["job"] in prompt
+        assert temp_files["output"] in prompt
+        assert "truthfulness" in prompt.lower()
+        assert "ats" in prompt.lower()
+        assert "iterate" in prompt.lower() or "iteration" in prompt.lower()
+    
+    @pytest.mark.asyncio
+    async def test_output_verification(self, settings, temp_files, mock_query):
+        """Test that output file creation is verified."""
+        # Mock messages without writing the file
+        messages = [
+            Mock(content=[Mock(text="Processing...")]),
+            Mock(content=[Mock(text="Done")])
+        ]
+        
+        async def mock_query_generator(*args, **kwargs):
+            for msg in messages:
+                yield msg
+        
+        mock_query.return_value = mock_query_generator()
+        
+        client = ClaudeClient(settings)
+        
+        # Should warn if output file wasn't created
+        warnings = []
+        def progress_callback(msg):
+            if "warning" in msg.lower():
+                warnings.append(msg)
+        
+        await client.customize_resume(
+            resume_path=temp_files["resume"],
+            job_description_path=temp_files["job"],
+            output_path=temp_files["output"],
+            progress_callback=progress_callback
+        )
+        
+        # Should have a warning about output file not created
+        assert len(warnings) > 0

@@ -1,66 +1,28 @@
-# ABOUTME: ClaudeClient wrapper for the Claude Code SDK
-# ABOUTME: Handles API communication, retries, and usage tracking
+# ABOUTME: ClaudeClient wrapper for the Claude Code SDK with file system tools
+# ABOUTME: Handles resume customization using Claude's file operations capabilities
 
 """Claude Code SDK wrapper for resume customization."""
 
-import asyncio
-import time
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Optional, Dict, Any
+from pathlib import Path
+from typing import Optional, Callable
 
-from anthropic import Anthropic, AsyncAnthropic
+from claude_code_sdk import query, ClaudeCodeOptions
 from resume_customizer.config import Settings
+from resume_customizer.utils.logging import get_logger
 
 
-@dataclass
-class ClaudeResponse:
-    """Response from Claude API."""
-    content: str
-    input_tokens: int
-    output_tokens: int
-    total_tokens: int
-    model: str
-    timestamp: datetime = None
-    
-    def __post_init__(self):
-        """Initialize timestamp if not provided."""
-        if self.timestamp is None:
-            self.timestamp = datetime.now()
-
-
-class ClaudeAPIError(Exception):
-    """Base exception for Claude API errors."""
-    pass
-
-
-class ClaudeRateLimitError(ClaudeAPIError):
-    """Rate limit error from Claude API."""
-    pass
-
-
-class ClaudeTimeoutError(ClaudeAPIError):
-    """Timeout error when calling Claude API."""
-    pass
+logger = get_logger(__name__)
 
 
 class ClaudeClient:
-    """Wrapper around Claude Code SDK for easier testing and usage tracking."""
-    
-    # Cost per million tokens (as of 2024)
-    PRICING = {
-        "claude-3-opus-20240229": {"input": 15.0, "output": 75.0},
-        "claude-3-sonnet-20240229": {"input": 3.0, "output": 15.0},
-        "claude-3-haiku-20240307": {"input": 0.25, "output": 1.25},
-        "claude-3-5-sonnet-20241022": {"input": 3.0, "output": 15.0},
-    }
+    """Wrapper around Claude Code SDK for resume customization with file tools."""
     
     def __init__(self, settings: Settings):
         """
         Initialize Claude client with settings.
         
         Args:
-            settings: Application settings with API key and model config
+            settings: Application settings with API key and configuration
             
         Raises:
             ValueError: If API key is missing
@@ -69,164 +31,220 @@ class ClaudeClient:
             raise ValueError("Claude API key is required")
         
         self.settings = settings
-        self.client = AsyncAnthropic(api_key=settings.claude_api_key)
-        self.sync_client = Anthropic(api_key=settings.claude_api_key)
-        
-        # Usage tracking
-        self.total_tokens = 0
-        self.total_cost = 0.0
+        logger.info("ClaudeClient initialized with Claude Code SDK")
     
-    async def query(
+    async def customize_resume(
         self,
-        prompt: str,
-        system_prompt: Optional[str] = None,
-        model: Optional[str] = None,
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None
-    ) -> ClaudeResponse:
+        resume_path: str,
+        job_description_path: str,
+        output_path: str,
+        progress_callback: Optional[Callable[[str], None]] = None
+    ) -> None:
         """
-        Send a query to Claude API with retry logic.
+        Customize a resume for a specific job using Claude Code SDK.
+        
+        Claude will read the input files, analyze them, and write the customized
+        resume directly to the output file.
         
         Args:
-            prompt: The user prompt to send
-            system_prompt: Optional system prompt for context
-            model: Optional model override
-            max_tokens: Optional max tokens override
-            temperature: Optional temperature override
-            
-        Returns:
-            ClaudeResponse with the result
+            resume_path: Path to the input resume file
+            job_description_path: Path to the job description file
+            output_path: Path where customized resume will be written
+            progress_callback: Optional callback for progress updates
             
         Raises:
-            ClaudeRateLimitError: If rate limit is hit after retries
-            ClaudeTimeoutError: If request times out
-            ClaudeAPIError: For other API errors
+            FileNotFoundError: If input files don't exist
+            Exception: For other errors during customization
         """
-        model = model or self.settings.model
-        max_tokens = max_tokens or self.settings.max_tokens
-        temperature = temperature if temperature is not None else self.settings.temperature
+        # Validate input files exist
+        if not Path(resume_path).exists():
+            raise FileNotFoundError(f"Resume file not found: {resume_path}")
         
-        # Build messages
-        messages = [{"role": "user", "content": prompt}]
+        if not Path(job_description_path).exists():
+            raise FileNotFoundError(f"Job description file not found: {job_description_path}")
         
-        # Prepare request kwargs
-        request_kwargs = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature
-        }
+        # Ensure output directory exists
+        output_dir = Path(output_path).parent
+        output_dir.mkdir(parents=True, exist_ok=True)
         
-        if system_prompt:
-            request_kwargs["system"] = system_prompt
-        
-        # Retry logic
-        last_error = None
-        for attempt in range(self.settings.max_retries + 1):
-            try:
-                # Make API call with timeout
-                response = await asyncio.wait_for(
-                    self.client.messages.create(**request_kwargs),
-                    timeout=self.settings.timeout
-                )
-                
-                # Parse response
-                if response.content is None:
-                    raise ClaudeAPIError("Malformed response from Claude API")
-                    
-                if not response.content:
-                    raise ClaudeAPIError("Empty response from Claude API")
-                
-                if not isinstance(response.content, list) or len(response.content) == 0:
-                    raise ClaudeAPIError("Empty response from Claude API")
-                
-                content = response.content[0].text
-                input_tokens = response.usage.input_tokens
-                output_tokens = response.usage.output_tokens
-                total_tokens = input_tokens + output_tokens
-                
-                # Update usage tracking
-                self.total_tokens += total_tokens
-                cost = self._calculate_cost(input_tokens, output_tokens, model)
-                self.total_cost += cost
-                
-                return ClaudeResponse(
-                    content=content,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    total_tokens=total_tokens,
-                    model=model
-                )
-                
-            except asyncio.TimeoutError:
-                raise ClaudeTimeoutError(
-                    f"Request timed out after {self.settings.timeout} seconds"
-                )
-                
-            except Exception as e:
-                # Check if it's a rate limit error
-                if hasattr(e, 'status_code') and e.status_code == 429:
-                    last_error = e
-                    if attempt < self.settings.max_retries:
-                        # Exponential backoff
-                        delay = self.settings.retry_delay * (2 ** attempt)
-                        await asyncio.sleep(delay)
-                        continue
-                    else:
-                        raise ClaudeRateLimitError(
-                            f"Rate limit exceeded after {self.settings.max_retries} retries"
-                        ) from e
-                
-                # Other API errors
-                if hasattr(e, 'status_code'):
-                    raise ClaudeAPIError(
-                        f"API error (status {e.status_code}): {str(e)}"
-                    ) from e
-                else:
-                    raise ClaudeAPIError(f"Unexpected error: {str(e)}") from e
-        
-        # Should not reach here, but just in case
-        raise ClaudeAPIError(
-            f"Failed after {self.settings.max_retries + 1} attempts"
+        # Build the orchestrator prompt
+        prompt = self._build_orchestrator_prompt(
+            resume_path=resume_path,
+            job_description_path=job_description_path,
+            output_path=output_path
         )
+        
+        # Configure Claude Code options
+        options = ClaudeCodeOptions(
+            max_turns=1,  # Single turn, Claude handles iterations internally
+            allowed_tools=["Read", "Write"],  # File system access only
+            system_prompt=self.settings.system_prompt if hasattr(self.settings, 'system_prompt') else None,
+            cwd=Path.cwd()  # Set working directory
+        )
+        
+        logger.info(f"Starting resume customization with Claude Code SDK")
+        logger.debug(f"Resume: {resume_path}")
+        logger.debug(f"Job Description: {job_description_path}")
+        logger.debug(f"Output: {output_path}")
+        
+        # Track tool usage
+        tool_usage = {"Read": 0, "Write": 0}
+        
+        try:
+            # Process messages from Claude
+            async for message in query(prompt, options=options):
+                # Log progress
+                if hasattr(message, 'content') and message.content:
+                    for content_block in message.content:
+                        # Handle text messages
+                        if hasattr(content_block, 'text') and content_block.text:
+                            text = content_block.text
+                            logger.info(f"Claude: {text[:100]}...")
+                            if progress_callback:
+                                progress_callback(text)
+                        
+                        # Handle tool usage
+                        elif hasattr(content_block, 'name') and content_block.name:
+                            tool_name = content_block.name
+                            tool_usage[tool_name] = tool_usage.get(tool_name, 0) + 1
+                            
+                            if hasattr(content_block, 'input'):
+                                tool_input = content_block.input
+                                if tool_name == "Read":
+                                    file_path = tool_input.get('path', 'unknown')
+                                    logger.info(f"Claude reading file: {file_path}")
+                                    if progress_callback:
+                                        progress_callback(f"Tool: Read - {file_path}")
+                                elif tool_name == "Write":
+                                    file_path = tool_input.get('path', 'unknown')
+                                    logger.info(f"Claude writing file: {file_path}")
+                                    if progress_callback:
+                                        progress_callback(f"Tool: Write - {file_path}")
+            
+            # Log tool usage summary
+            logger.info(f"Tool usage summary: {tool_usage}")
+            
+            # Verify output file was created
+            if not Path(output_path).exists():
+                warning_msg = f"Warning: Output file was not created at {output_path}"
+                logger.warning(warning_msg)
+                if progress_callback:
+                    progress_callback(warning_msg)
+            else:
+                success_msg = f"Resume customization completed successfully! Output: {output_path}"
+                logger.info(success_msg)
+                if progress_callback:
+                    progress_callback(success_msg)
+                    
+        except Exception as e:
+            logger.error(f"Error during resume customization: {str(e)}")
+            raise
     
-    def _calculate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
+    def _build_orchestrator_prompt(
+        self,
+        resume_path: str,
+        job_description_path: str,
+        output_path: str
+    ) -> str:
         """
-        Calculate cost based on token usage.
+        Build the orchestrator prompt that includes sub-agent instructions.
         
         Args:
-            input_tokens: Number of input tokens
-            output_tokens: Number of output tokens  
-            model: Model name
+            resume_path: Path to the input resume file
+            job_description_path: Path to the job description file
+            output_path: Path where customized resume will be written
             
         Returns:
-            Cost in dollars
+            The complete orchestrator prompt
         """
-        if model not in self.PRICING:
-            # Default to Sonnet pricing if model not found
-            model = "claude-3-sonnet-20240229"
-        
-        pricing = self.PRICING[model]
-        input_cost = (input_tokens / 1000) * (pricing["input"] / 1000)
-        output_cost = (output_tokens / 1000) * (pricing["output"] / 1000)
-        
-        return input_cost + output_cost
-    
-    def get_usage_stats(self) -> Dict[str, Any]:
-        """
-        Get current usage statistics.
-        
-        Returns:
-            Dictionary with usage stats
-        """
-        return {
-            "total_tokens": self.total_tokens,
-            "total_cost": self.total_cost,
-            "model": self.settings.model,
-            "timestamp": datetime.now().isoformat()
-        }
-    
-    def reset_usage_stats(self) -> None:
-        """Reset usage statistics."""
-        self.total_tokens = 0
-        self.total_cost = 0.0
+        prompt = f"""You are an expert resume customization orchestrator. Your task is to customize a resume for a specific job application using an orchestrator-workers pattern with multiple iterations for refinement.
+
+## Input Files
+- Resume: {resume_path}
+- Job Description: {job_description_path}
+
+## Output File
+- Customized Resume: {output_path}
+
+## Process Overview
+You will act as an orchestrator managing multiple specialized sub-agents to analyze, match, and optimize the resume. Each sub-agent has specific expertise, and you'll coordinate their work through multiple iterations.
+
+## Sub-Agent Roles
+
+### 1. Resume Analyzer Agent
+- Extract and understand all sections of the resume
+- Identify key skills, experiences, and achievements
+- Note the current structure and formatting
+- Catalog quantifiable results and specific technologies
+
+### 2. Job Requirements Analyzer Agent
+- Parse the job description thoroughly
+- Extract required skills, qualifications, and keywords
+- Identify nice-to-have skills
+- Understand the company culture and values from the posting
+- Note any specific ATS keywords that must be included
+
+### 3. Gap Analysis Agent
+- Compare resume content with job requirements
+- Identify missing keywords and skills
+- Find relevant experiences that aren't highlighted
+- Determine which accomplishments best match the role
+
+### 4. ATS Optimization Agent
+- Ensure all critical keywords from job description are naturally integrated
+- Optimize section headings for ATS parsing
+- Verify standard section names (Experience, Education, Skills)
+- Check for ATS-friendly formatting
+
+### 5. Content Enhancement Agent
+- Rewrite bullet points to emphasize relevant experience
+- Quantify achievements where possible
+- Tailor the professional summary to the specific role
+- Ensure action verbs align with the job level
+
+### 6. Quality Assurance Agent
+- Verify all information remains truthful
+- Check for consistency in formatting and style
+- Ensure the resume tells a coherent career story
+- Validate that all job requirements are addressed
+
+## Iteration Process
+
+Perform at least {self.settings.max_iterations} iterations:
+
+### Iteration 1: Initial Analysis and Customization
+1. Read both input files
+2. Perform initial analysis with all agents
+3. Create first version of customized resume
+4. Focus on incorporating all critical keywords
+
+### Iteration 2: Enhancement and Optimization
+1. Review the first version
+2. Enhance bullet points for stronger impact
+3. Optimize for ATS scanning
+4. Ensure all requirements are addressed
+
+### Iteration 3: Polish and Refinement
+1. Final review for quality and coherence
+2. Fine-tune language for maximum impact
+3. Verify truthfulness constraint
+4. Make final adjustments
+
+## Critical Constraints
+
+1. **Truthfulness**: You must NEVER add false information. Only reorganize, reframe, and emphasize existing experiences.
+2. **ATS Compatibility**: Maintain standard section headings and clean formatting.
+3. **Relevance**: Every modification should make the resume more relevant to the specific job.
+4. **Professional Tone**: Maintain a professional, confident tone throughout.
+
+## Output Requirements
+
+Write the final customized resume to the specified output file. The resume should:
+- Include all relevant keywords from the job description
+- Emphasize experiences that match job requirements
+- Maintain clean, ATS-friendly formatting
+- Tell a compelling career story aligned with the target role
+
+Begin by reading both input files, then proceed with the iterative customization process."""
+
+        return prompt

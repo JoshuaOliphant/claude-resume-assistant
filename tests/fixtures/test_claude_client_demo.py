@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
 
-from resume_customizer.core.claude_client import ClaudeClient, ClaudeAPIError
+from resume_customizer.core.claude_client import ClaudeClient
 from resume_customizer.config import Settings
 
 

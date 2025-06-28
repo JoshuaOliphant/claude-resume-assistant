@@ -16,21 +16,21 @@ This file tracks the implementation progress of the Resume Customizer applicatio
   - [x] Step 2.2: Job description model
   - [x] Step 2.3: Customization result model
 - [x] File I/O
-  - [x] Step 3.1: Markdown reader
-  - [ ] Step 3.2: Text file reader
-  - [x] Step 3.3: Output writer
-- [x] Claude Code SDK Setup
-  - [x] Step 4.1: SDK configuration
-  - [ ] Step 4.2: Basic prompt testing
+  - [x] Step 3.1: Markdown reader - Not needed (Claude reads files)
+  - [ ] Step 3.2: Text file reader - Not Applicable
+  - [x] Step 3.3: Output writer - Not needed (Claude writes files)
+- [ ] Claude Code SDK Setup
+  - [ ] Step 4.1: SDK configuration - REDO with correct SDK
+  - [ ] Step 4.2: Basic prompt testing with file operations
 - [ ] Prompt Engineering
-  - [ ] Step 5.1: Orchestrator prompt
-  - [ ] Step 5.2: Sub-agent prompts
-  - [ ] Step 5.3: Result extraction
+  - [ ] Step 5.1: Orchestrator prompt - Simplified (includes sub-agents)
+  - [ ] Step 5.2: Sub-agent prompts - Not needed (handled in prompt)
+  - [ ] Step 5.3: Result extraction - Not needed (Claude writes directly)
 - [ ] Core Customization Engine
-  - [ ] Step 6.1: Resume analyzer
-  - [ ] Step 6.2: Job matcher
-  - [ ] Step 6.3: Content optimizer
-  - [ ] Step 6.4: Customizer integration
+  - [ ] Step 6.1: Resume analyzer - Not needed (Claude handles)
+  - [ ] Step 6.2: Job matcher - Not needed (Claude handles)
+  - [ ] Step 6.3: Content optimizer - Not needed (Claude handles)
+  - [ ] Step 6.4: Customizer integration - Simplified (SDK call only)
 - [ ] CLI Interface
   - [ ] Step 7.1: Click application
   - [ ] Step 7.2: Input validation
@@ -52,8 +52,8 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [ ] Deployment
 
 ## Current Step
-**Status**: Completed Step 4.1
-**Next**: Step 4.2 - Basic prompt testing
+**Status**: Need to REDO Step 4.1 with Claude Code SDK
+**Next**: Step 4.1 - Reimplement with correct SDK
 
 ## Test Coverage Goals
 - Unit Tests: 90%+
@@ -70,14 +70,20 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [x] click
 - [x] pydantic
 - [x] pydantic-settings
-- [x] anthropic (replaced claude-code-sdk)
+- [ ] claude-code-sdk (need to install and use instead of anthropic)
 - [x] pytest
 - [x] pytest-asyncio
 - [x] pytest-cov
 - [x] chardet
 - [x] pyyaml
 
+## Additional Requirements
+
+- [ ] Node.js installed (required for Claude Code SDK)
+- [ ] Claude Code CLI: npm install -g @anthropic-ai/claude-code
+
 ## Environment Setup
+
 - [x] .env.example file created
 - [ ] .env file created (user needs to copy and add API key)
 - [ ] ANTHROPIC_API_KEY configured
