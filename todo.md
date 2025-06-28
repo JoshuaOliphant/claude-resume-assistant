@@ -12,7 +12,7 @@ This file tracks the implementation progress of the Resume Customizer applicatio
   - [x] Step 1.2: Create settings module
   - [x] Step 1.3: Set up logging
 - [ ] Domain Models
-  - [ ] Step 2.1: Resume model
+  - [x] Step 2.1: Resume model
   - [ ] Step 2.2: Job description model
   - [ ] Step 2.3: Customization result model
 - [ ] File I/O
@@ -52,8 +52,8 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [ ] Deployment
 
 ## Current Step
-**Status**: Completed Step 1.3
-**Next**: Step 2.1 - Resume model
+**Status**: Completed Step 2.1
+**Next**: Step 2.2 - Job description model
 
 ## Test Coverage Goals
 - Unit Tests: 90%+
