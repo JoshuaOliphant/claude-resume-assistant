@@ -1,0 +1,99 @@
+# ABOUTME: Configuration management using Pydantic settings
+# ABOUTME: Handles environment variables, defaults, and validation
+
+"""Configuration management for the resume customizer application."""
+
+import functools
+from typing import Literal
+
+from pydantic import Field, field_validator, ValidationError
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Application settings with environment variable support."""
+    
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore'
+    )
+    
+    # API Key - directly from ANTHROPIC_API_KEY
+    claude_api_key: str = Field(
+        ...,
+        alias='ANTHROPIC_API_KEY',
+        description="Anthropic API key for Claude"
+    )
+    
+    # Settings with RESUME_ prefix
+    max_iterations: int = Field(
+        default=3,
+        alias='RESUME_MAX_ITERATIONS',
+        description="Maximum number of optimization iterations"
+    )
+    
+    output_format: Literal["markdown", "html", "pdf"] = Field(
+        default="markdown",
+        alias='RESUME_OUTPUT_FORMAT',
+        description="Output format for the customized resume"
+    )
+    
+    preserve_formatting: bool = Field(
+        default=True,
+        alias='RESUME_PRESERVE_FORMATTING',
+        description="Whether to preserve original formatting"
+    )
+    
+    @field_validator('claude_api_key')
+    def validate_api_key(cls, v: str) -> str:
+        """Validate that API key is not empty."""
+        if not v:
+            raise ValueError("API key cannot be empty")
+        return v
+    
+    @field_validator('claude_api_key', mode='before')
+    def check_api_key_exists(cls, v) -> str:
+        """Check that API key is provided."""
+        if v is None:
+            raise ValueError("API key is required")
+        return v
+    
+    @field_validator('max_iterations')
+    def validate_max_iterations(cls, v: int) -> int:
+        """Validate that max_iterations is positive."""
+        if v <= 0:
+            raise ValueError("max_iterations must be greater than 0")
+        return v
+    
+    @field_validator('output_format')
+    def validate_output_format(cls, v: str) -> str:
+        """Validate output format."""
+        valid_formats = ["markdown", "html", "pdf"]
+        if v not in valid_formats:
+            raise ValueError(f"output_format must be one of {valid_formats}")
+        return v
+
+
+@functools.lru_cache()
+def get_settings() -> Settings:
+    """
+    Get cached settings instance.
+    
+    Returns:
+        Settings: Cached settings instance
+        
+    Note:
+        Use get_settings.cache_clear() to clear the cache if needed.
+    """
+    try:
+        return Settings()
+    except ValidationError as e:
+        # Re-raise with custom message for specific validations
+        for error in e.errors():
+            if error['loc'] == ('ANTHROPIC_API_KEY',) and error['type'] == 'missing':
+                raise ValueError("API key is required") from e
+            elif error['loc'] == ('RESUME_OUTPUT_FORMAT',) and error['type'] == 'literal_error':
+                raise ValueError("output_format must be one of ['markdown', 'html', 'pdf']") from e
+        raise
