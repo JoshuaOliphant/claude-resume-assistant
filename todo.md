@@ -19,8 +19,8 @@ This file tracks the implementation progress of the Resume Customizer applicatio
   - [x] Step 3.1: Markdown reader
   - [ ] Step 3.2: Text file reader
   - [x] Step 3.3: Output writer
-- [ ] Claude Code SDK Setup
-  - [ ] Step 4.1: SDK configuration
+- [x] Claude Code SDK Setup
+  - [x] Step 4.1: SDK configuration
   - [ ] Step 4.2: Basic prompt testing
 - [ ] Prompt Engineering
   - [ ] Step 5.1: Orchestrator prompt
@@ -52,8 +52,8 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [ ] Deployment
 
 ## Current Step
-**Status**: Completed Step 3.3
-**Next**: Step 3.2 - Text file reader (or move to Step 4.1)
+**Status**: Completed Step 4.1
+**Next**: Step 4.2 - Basic prompt testing
 
 ## Test Coverage Goals
 - Unit Tests: 90%+
@@ -70,7 +70,7 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [x] click
 - [x] pydantic
 - [x] pydantic-settings
-- [x] claude-code-sdk
+- [x] anthropic (replaced claude-code-sdk)
 - [x] pytest
 - [x] pytest-asyncio
 - [x] pytest-cov
