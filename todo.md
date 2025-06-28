@@ -16,7 +16,7 @@ This file tracks the implementation progress of the Resume Customizer applicatio
   - [x] Step 2.2: Job description model
   - [x] Step 2.3: Customization result model
 - [ ] File I/O
-  - [ ] Step 3.1: Markdown reader
+  - [x] Step 3.1: Markdown reader
   - [ ] Step 3.2: Text file reader
   - [ ] Step 3.3: Output writer
 - [ ] Claude Code SDK Setup
@@ -52,8 +52,8 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [ ] Deployment
 
 ## Current Step
-**Status**: Completed Step 2.1
-**Next**: Step 2.2 - Job description model
+**Status**: Completed Step 3.1
+**Next**: Step 3.2 - Text file reader
 
 ## Test Coverage Goals
 - Unit Tests: 90%+
@@ -74,6 +74,8 @@ This file tracks the implementation progress of the Resume Customizer applicatio
 - [x] pytest
 - [x] pytest-asyncio
 - [x] pytest-cov
+- [x] chardet
+- [x] pyyaml
 
 ## Environment Setup
 - [x] .env.example file created
