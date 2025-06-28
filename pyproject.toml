@@ -5,10 +5,12 @@ description = "AI-powered resume customization tool using Claude Code SDK"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "chardet>=5.2.0",
     "claude-code-sdk>=0.0.13",
     "click>=8.2.1",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",
+    "pyyaml>=6.0.2",
 ]
 
 [dependency-groups]
