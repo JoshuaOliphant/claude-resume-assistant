@@ -11,10 +11,10 @@ This file tracks the implementation progress of the Resume Customizer applicatio
   - [x] Step 1.1: Initialize project structure
   - [x] Step 1.2: Create settings module
   - [x] Step 1.3: Set up logging
-- [ ] Domain Models
+- [x] Domain Models
   - [x] Step 2.1: Resume model
-  - [ ] Step 2.2: Job description model
-  - [ ] Step 2.3: Customization result model
+  - [x] Step 2.2: Job description model
+  - [x] Step 2.3: Customization result model
 - [ ] File I/O
   - [ ] Step 3.1: Markdown reader
   - [ ] Step 3.2: Text file reader
