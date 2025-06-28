@@ -304,25 +304,34 @@ class TestClaudeClient:
             output_path=temp_files["output"]
         )
     
-    def test_build_orchestrator_prompt(self, settings, temp_files):
-        """Test orchestrator prompt building."""
-        client = ClaudeClient(settings)
-        
-        prompt = client._build_orchestrator_prompt(
-            resume_path=temp_files["resume"],
-            job_description_path=temp_files["job"],
-            output_path=temp_files["output"]
-        )
-        
-        # Verify prompt contains necessary elements
-        assert "orchestrator" in prompt.lower()
-        assert "sub-agent" in prompt.lower()
-        assert temp_files["resume"] in prompt
-        assert temp_files["job"] in prompt
-        assert temp_files["output"] in prompt
-        assert "truthfulness" in prompt.lower()
-        assert "ats" in prompt.lower()
-        assert "iterate" in prompt.lower() or "iteration" in prompt.lower()
+    def test_uses_build_orchestrator_prompt(self, settings, temp_files, mock_query):
+        """Test that ClaudeClient uses the build_orchestrator_prompt function."""
+        # Mock the build_orchestrator_prompt function
+        with patch('resume_customizer.core.claude_client.build_orchestrator_prompt') as mock_build_prompt:
+            mock_build_prompt.return_value = "Test orchestrator prompt"
+            
+            # Mock query to return minimal response
+            async def mock_query_generator(*args, **kwargs):
+                yield Mock(content=[Mock(text="Done")])
+            
+            mock_query.return_value = mock_query_generator()
+            
+            client = ClaudeClient(settings)
+            
+            # Run customization
+            asyncio.run(client.customize_resume(
+                resume_path=temp_files["resume"],
+                job_description_path=temp_files["job"],
+                output_path=temp_files["output"]
+            ))
+            
+            # Verify build_orchestrator_prompt was called with correct args
+            mock_build_prompt.assert_called_once_with(
+                resume_path=temp_files["resume"],
+                job_description_path=temp_files["job"],
+                output_path=temp_files["output"],
+                settings=settings
+            )
     
     @pytest.mark.asyncio
     async def test_output_verification(self, settings, temp_files, mock_query):
