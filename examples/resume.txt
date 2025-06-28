@@ -1,0 +1,62 @@
+Sarah Johnson
+Full-Stack Software Engineer
+sarah.johnson@email.com | (555) 234-5678 | LinkedIn: linkedin.com/in/sarahjohnson | GitHub: github.com/sjohnson
+
+PROFESSIONAL SUMMARY
+Versatile software engineer with 6 years of experience building scalable web applications and leading cross-functional teams. Passionate about creating efficient, user-centric solutions and mentoring junior developers.
+
+WORK EXPERIENCE
+
+Senior Software Engineer
+TechVentures Inc. | San Francisco, CA | March 2021 - Present
+• Architected and developed microservices handling 2M+ daily transactions using Python, Node.js, and Go
+• Led a team of 5 engineers in migrating monolithic application to microservices, reducing deployment time by 70%
+• Implemented comprehensive CI/CD pipeline using Jenkins and GitLab, improving release frequency from monthly to weekly
+• Mentored 3 junior developers, conducting code reviews and pair programming sessions
+• Reduced API response time by 45% through database optimization and caching strategies
+
+Full-Stack Developer
+Digital Solutions Corp | San Jose, CA | June 2019 - February 2021
+• Developed responsive web applications using React, Redux, and TypeScript serving 50K+ active users
+• Built RESTful APIs with Django and PostgreSQL, implementing OAuth2 authentication
+• Collaborated with UX team to improve user experience, resulting in 30% increase in user engagement
+• Implemented automated testing suite achieving 85% code coverage
+• Optimized front-end performance, reducing page load time by 40%
+
+Junior Software Developer
+StartupHub | Mountain View, CA | July 2018 - May 2019
+• Contributed to development of SaaS platform using Ruby on Rails and Vue.js
+• Participated in agile development process, delivering features on bi-weekly sprints
+• Resolved 50+ bug tickets and implemented 20+ feature requests
+• Created technical documentation for internal APIs and development processes
+
+EDUCATION
+
+Bachelor of Science in Computer Science
+University of California, Berkeley | 2014 - 2018
+GPA: 3.7/4.0 | Dean's List: 4 semesters
+
+TECHNICAL SKILLS
+
+Programming Languages: Python, JavaScript, TypeScript, Java, Go, Ruby
+Frontend: React, Redux, Vue.js, Angular, HTML5, CSS3, SASS, Webpack
+Backend: Django, Node.js, Express.js, Spring Boot, Ruby on Rails
+Databases: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch
+Cloud & DevOps: AWS (EC2, S3, Lambda, RDS), Docker, Kubernetes, Jenkins, GitLab CI/CD
+Tools & Methods: Git, Jira, Agile/Scrum, TDD, Microservices Architecture
+
+PROJECTS
+
+Open Source Contributions
+• Contributor to popular React component library with 10K+ GitHub stars
+• Maintained Python package for API testing with 500+ weekly downloads
+
+Personal Finance Tracker
+• Built full-stack application using React and Django to help users manage budgets
+• Implemented data visualization using D3.js for spending analytics
+• Deployed on AWS using Docker containers and automated with GitHub Actions
+
+CERTIFICATIONS
+
+AWS Certified Solutions Architect - Associate (2022)
+Certified Kubernetes Administrator (CKA) (2023)

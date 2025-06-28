@@ -1,0 +1,57 @@
+Senior Backend Engineer - FinTech Platform
+
+About Us:
+PayFlow is a rapidly growing FinTech startup revolutionizing digital payments and financial services. We're building the next generation of payment infrastructure that processes billions in transactions. We're looking for a Senior Backend Engineer to join our core platform team.
+
+Position Overview:
+We need an experienced backend engineer who can design and implement highly scalable, secure financial systems. You'll work on critical payment processing infrastructure, ensuring reliability, security, and compliance with financial regulations.
+
+Key Responsibilities:
+• Design and develop high-performance APIs for payment processing handling millions of transactions daily
+• Build secure, scalable microservices using Python and Go for financial transactions
+• Implement robust error handling and transaction rollback mechanisms for payment failures
+• Ensure PCI DSS compliance and implement security best practices for financial data
+• Optimize database performance for high-volume transaction processing
+• Collaborate with security team on threat modeling and security audits
+• Mentor junior engineers and contribute to technical architecture decisions
+• Participate in on-call rotation for production support of critical financial systems
+
+Required Qualifications:
+• 5+ years of backend development experience, with at least 2 years in FinTech or payment systems
+• Expert-level proficiency in Python and experience with Go or Java
+• Strong experience with PostgreSQL, including performance optimization and transaction management
+• Proven track record building secure, scalable APIs handling high transaction volumes
+• Experience with message queuing systems (Kafka, RabbitMQ) for asynchronous processing
+• Deep understanding of distributed systems and microservices architecture
+• Experience with AWS services, particularly for building resilient financial systems
+• Knowledge of financial regulations and compliance requirements (PCI DSS, SOC 2)
+• Strong understanding of security best practices for financial applications
+
+Preferred Qualifications:
+• Experience with payment gateways (Stripe, PayPal, Square) integration
+• Knowledge of blockchain technology and cryptocurrency payment systems
+• Experience with event sourcing and CQRS patterns
+• Familiarity with financial industry standards (ISO 20022, SWIFT)
+• Experience with high-frequency trading systems or real-time payment processing
+• Background in mathematics, statistics, or financial engineering
+
+Technical Environment:
+• Languages: Python (primary), Go, Java
+• Databases: PostgreSQL, Redis, DynamoDB
+• Message Queue: Apache Kafka
+• Cloud: AWS (Lambda, ECS, RDS, DynamoDB, SQS)
+• Monitoring: Datadog, PagerDuty, Sentry
+• CI/CD: GitLab CI, ArgoCD
+• Container: Docker, Kubernetes (EKS)
+
+What We Offer:
+• Competitive salary: $180,000 - $220,000
+• Equity package with high growth potential
+• Comprehensive health, dental, and vision insurance
+• $2,000 annual learning and development budget
+• Flexible work arrangements (hybrid/remote options)
+• Opportunity to work on cutting-edge financial technology
+
+Location: San Francisco, CA (Hybrid - 3 days in office)
+
+PayFlow is an equal opportunity employer committed to building a diverse and inclusive team.

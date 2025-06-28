@@ -1,0 +1,82 @@
+# Resume Customizer Implementation TODO
+
+## Project Status Tracking
+
+This file tracks the implementation progress of the Resume Customizer application following TDD principles.
+
+## Implementation Phases
+
+### Phase 1: CLI Application
+- [ ] Project Foundation
+  - [ ] Step 1.1: Initialize project structure
+  - [ ] Step 1.2: Create settings module
+  - [ ] Step 1.3: Set up logging
+- [ ] Domain Models
+  - [ ] Step 2.1: Resume model
+  - [ ] Step 2.2: Job description model
+  - [ ] Step 2.3: Customization result model
+- [ ] File I/O
+  - [ ] Step 3.1: Markdown reader
+  - [ ] Step 3.2: Text file reader
+  - [ ] Step 3.3: Output writer
+- [ ] Claude Code SDK Setup
+  - [ ] Step 4.1: SDK configuration
+  - [ ] Step 4.2: Basic prompt testing
+- [ ] Prompt Engineering
+  - [ ] Step 5.1: Orchestrator prompt
+  - [ ] Step 5.2: Sub-agent prompts
+  - [ ] Step 5.3: Result extraction
+- [ ] Core Customization Engine
+  - [ ] Step 6.1: Resume analyzer
+  - [ ] Step 6.2: Job matcher
+  - [ ] Step 6.3: Content optimizer
+  - [ ] Step 6.4: Customizer integration
+- [ ] CLI Interface
+  - [ ] Step 7.1: Click application
+  - [ ] Step 7.2: Input validation
+  - [ ] Step 7.3: Progress display
+  - [ ] Step 7.4: Output handling
+- [ ] Error Handling & Resilience
+  - [ ] Step 8.1: API error handling
+  - [ ] Step 8.2: File error handling
+  - [ ] Step 8.3: Validation & warnings
+- [ ] Integration & Polish
+  - [ ] Step 9.1: End-to-end testing
+  - [ ] Step 9.2: Documentation
+  - [ ] Step 9.3: Performance optimization
+
+### Phase 2: Web Application (Future)
+- [ ] FastAPI Backend
+- [ ] HTMX Frontend
+- [ ] Real-time Updates
+- [ ] Deployment
+
+## Current Step
+**Status**: Not started
+**Next**: Step 1.1 - Initialize project structure
+
+## Test Coverage Goals
+- Unit Tests: 90%+
+- Integration Tests: 80%+
+- E2E Tests: Key workflows
+
+## Notes
+- Each step must have tests written first (TDD)
+- No step should be larger than 2-3 hours of work
+- Integration happens continuously, not at the end
+- All code must be working and integrated at each step
+
+## Dependencies Installed
+- [ ] click
+- [ ] pydantic
+- [ ] pydantic-settings
+- [ ] claude-code-sdk
+- [ ] pytest
+- [ ] pytest-asyncio
+- [ ] pytest-cov
+
+## Environment Setup
+- [ ] .env file created
+- [ ] RESUME_CLAUDE_API_KEY configured
+- [ ] Python version verified
+- [ ] uv installed and configured
