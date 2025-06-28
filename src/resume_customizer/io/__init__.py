@@ -4,5 +4,6 @@
 """I/O operations for resume files."""
 
 from .readers import MarkdownReader
+from .writers import OutputWriter
 
-__all__ = ["MarkdownReader"]
+__all__ = ["MarkdownReader", "OutputWriter"]

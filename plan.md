@@ -424,6 +424,7 @@ Create a wrapper around Claude Code SDK for easier testing. Follow TDD:
    - Handles API errors gracefully
    - Implements retry logic
    - Tracks token usage
+   - Tracks cost
    - Supports timeout configuration
 
 2. Implement in src/resume_customizer/core/claude_client.py
