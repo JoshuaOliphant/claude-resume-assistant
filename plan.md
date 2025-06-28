@@ -238,7 +238,7 @@ This plan breaks down the Resume Customizer application into small, testable chu
 
 ## Code Generation Prompts
 
-### Prompt 1: Project Setup
+### Prompt 1: Project Setup (Step 1.1)
 
 ```text
 Create a new Python project for a resume customizer application using uv. Set up the project structure with the following:
@@ -263,7 +263,7 @@ Create a new Python project for a resume customizer application using uv. Set up
 Write tests first to verify the project structure is correct, then implement the setup.
 ```
 
-### Prompt 2: Settings Configuration
+### Prompt 2: Settings Configuration (Step 1.2)
 
 ```text
 Implement a settings module using Pydantic for configuration management. Follow TDD:
@@ -284,7 +284,7 @@ Implement a settings module using Pydantic for configuration management. Follow 
 Ensure all tests pass before moving on.
 ```
 
-### Prompt 3: Logging Setup
+### Prompt 3: Logging Setup (Step 1.3)
 
 ```text
 Add structured logging to the application using Python's logging module. Follow TDD:
@@ -304,7 +304,7 @@ Add structured logging to the application using Python's logging module. Follow 
 Test different log levels and ensure proper formatting.
 ```
 
-### Prompt 4: Resume Model
+### Prompt 4: Resume Model (Step 2.1)
 
 ```text
 Create a Resume domain model with comprehensive parsing capabilities. Follow TDD:
@@ -326,7 +326,7 @@ Create a Resume domain model with comprehensive parsing capabilities. Follow TDD
 Test with various resume formats and edge cases.
 ```
 
-### Prompt 5: Job Description Model
+### Prompt 5: Job Description Model (Step 2.2)
 
 ```text
 Create a JobDescription model for parsing job postings. Follow TDD:
@@ -348,7 +348,7 @@ Create a JobDescription model for parsing job postings. Follow TDD:
 Test with real job descriptions in various formats.
 ```
 
-### Prompt 6: Customization Result Model
+### Prompt 6: Customization Result Model (Step 2.3)
 
 ```text
 Create a CustomizationResult model to track changes. Follow TDD:
@@ -370,7 +370,7 @@ Create a CustomizationResult model to track changes. Follow TDD:
 Test change tracking and summary generation.
 ```
 
-### Prompt 7: Markdown Reader
+### Prompt 7: Markdown Reader (Step 3.1)
 
 ```text
 Implement a MarkdownReader for parsing resume files. Follow TDD:
@@ -392,7 +392,7 @@ Implement a MarkdownReader for parsing resume files. Follow TDD:
 Test with different file encodings and markdown styles.
 ```
 
-### Prompt 8: Output Writer
+### Prompt 8: Output Writer (Step 3.3)
 
 ```text
 Create an OutputWriter for saving customized resumes. Follow TDD:
@@ -414,7 +414,7 @@ Create an OutputWriter for saving customized resumes. Follow TDD:
 Test file writing with various scenarios and permissions.
 ```
 
-### Prompt 9: Claude Client Wrapper (UPDATED FOR CLAUDE CODE SDK)
+### Prompt 9: Claude Client Wrapper (Step 4.1) (UPDATED FOR CLAUDE CODE SDK)
 
 ```text
 Create a wrapper around Claude Code SDK with file system tools. Follow TDD:
@@ -437,7 +437,36 @@ Note: Claude Code SDK handles retries internally. Token tracking not available.
 Mock the query() function for testing.
 ```
 
-### Prompt 10: Orchestrator Prompt Builder (UPDATED)
+### Prompt 10: Basic Prompt Testing (Step 4.2)
+
+```text
+Test the Claude Code SDK integration with file operations. Follow TDD:
+
+1. Write integration tests that verify:
+   - Claude can read files through the Read tool
+   - Claude can write files through the Write tool
+   - Tool usage is properly tracked and reported
+   - Error scenarios are handled correctly
+   - File paths are validated before sending to Claude
+
+2. Create test scenarios in tests/integration/test_claude_integration.py:
+   - Test reading a simple markdown file
+   - Test writing output to a new file
+   - Test handling non-existent files
+   - Test keyword integration from job description
+   - Test progress tracking throughout the process
+
+3. Use test fixtures with real sample files
+4. Make actual API calls to understand Claude's behavior
+5. Verify the orchestrator prompt produces expected results
+6. Test progress callback functionality
+
+Note: These are integration tests that require ANTHROPIC_API_KEY to be set.
+They will make real API calls and help us understand how Claude actually
+behaves with file operations, rather than how we think it should behave.
+```
+
+### Prompt 11: Orchestrator Prompt Builder (Step 5.1) (UPDATED)
 
 ```text
 Build the orchestrator prompt that includes sub-agent instructions. Follow TDD:
@@ -459,7 +488,7 @@ Build the orchestrator prompt that includes sub-agent instructions. Follow TDD:
 Test that prompt contains all necessary instructions.
 ```
 
-### Prompt 11: Result Extractor (NO LONGER NEEDED)
+### Prompt 12: Result Extractor (Step 5.3) (NO LONGER NEEDED)
 
 ```text
 NO LONGER NEEDED - Claude Code SDK writes output directly to files.
@@ -473,7 +502,7 @@ Previously this would extract results from API responses, but with Claude Code S
 Skip this step entirely.
 ```
 
-### Prompt 12: Resume Customizer Core (SIMPLIFIED)
+### Prompt 13: Resume Customizer Core (Step 6.4) (SIMPLIFIED)
 
 ```text
 Implement the simplified ResumeCustomizer class. Follow TDD:
@@ -496,7 +525,7 @@ Implement the simplified ResumeCustomizer class. Follow TDD:
 Test the complete flow with mocked Claude responses.
 ```
 
-### Prompt 13: CLI Implementation
+### Prompt 14: CLI Implementation (Step 7.1)
 
 ```text
 Create the Click CLI application. Follow TDD:
@@ -518,7 +547,7 @@ Create the Click CLI application. Follow TDD:
 Test CLI with various argument combinations.
 ```
 
-### Prompt 14: Progress Display
+### Prompt 15: Progress Display (Step 7.3)
 
 ```text
 Add progress indicators to the CLI. Follow TDD:
@@ -540,7 +569,7 @@ Add progress indicators to the CLI. Follow TDD:
 Test progress display with various scenarios.
 ```
 
-### Prompt 15: Error Handling Enhancement
+### Prompt 16: Error Handling Enhancement (Step 8.1)
 
 ```text
 Enhance error handling throughout the application. Follow TDD:
@@ -562,7 +591,7 @@ Enhance error handling throughout the application. Follow TDD:
 Test all error scenarios with helpful outputs.
 ```
 
-### Prompt 16: Integration Testing
+### Prompt 17: Integration Testing (Step 9.1)
 
 ```text
 Create comprehensive integration tests. Follow TDD:
@@ -584,7 +613,7 @@ Create comprehensive integration tests. Follow TDD:
 Ensure all components work together correctly.
 ```
 
-### Prompt 17: Final Polish and Documentation
+### Prompt 17: Final Polish and Documentation (Step 9.2-9.3)
 
 ```text
 Add final polish and documentation:

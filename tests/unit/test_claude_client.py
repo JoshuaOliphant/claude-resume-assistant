@@ -154,18 +154,20 @@ class TestClaudeClient:
         mock_query.assert_called_once()
         call_args = mock_query.call_args
         
-        # Check prompt contains file paths
-        prompt = call_args[0][0]  # First positional argument
+        # Check prompt contains file paths (now using keyword arguments)
+        assert 'prompt' in call_args.kwargs
+        prompt = call_args.kwargs['prompt']
         assert temp_files["resume"] in prompt
         assert temp_files["job"] in prompt
         assert temp_files["output"] in prompt
         
         # Check ClaudeCodeOptions
-        options = call_args[1]["options"]
+        assert 'options' in call_args.kwargs
+        options = call_args.kwargs['options']
         assert isinstance(options, ClaudeCodeOptions)
         assert "Read" in options.allowed_tools
         assert "Write" in options.allowed_tools
-        assert options.max_turns == 1
+        assert options.max_turns == 10
         
         # Check progress messages
         assert len(progress_messages) > 0

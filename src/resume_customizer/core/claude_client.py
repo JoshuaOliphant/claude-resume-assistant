@@ -76,8 +76,8 @@ class ClaudeClient:
         
         # Configure Claude Code options
         options = ClaudeCodeOptions(
-            max_turns=1,  # Single turn, Claude handles iterations internally
-            allowed_tools=["Read", "Write"],  # File system access only
+            max_turns=10,  # Allow multiple turns for Claude to complete the task
+            allowed_tools=["Read", "Write", "Edit", "TodoWrite", "TodoRead"],  # Include all tools Claude might use
             system_prompt=self.settings.system_prompt if hasattr(self.settings, 'system_prompt') else None,
             cwd=Path.cwd()  # Set working directory
         )
@@ -92,7 +92,7 @@ class ClaudeClient:
         
         try:
             # Process messages from Claude
-            async for message in query(prompt, options=options):
+            async for message in query(prompt=prompt, options=options):
                 # Log progress
                 if hasattr(message, 'content') and message.content:
                     for content_block in message.content:
@@ -108,18 +108,33 @@ class ClaudeClient:
                             tool_name = content_block.name
                             tool_usage[tool_name] = tool_usage.get(tool_name, 0) + 1
                             
+                            logger.info(f"Claude using tool: {tool_name}")
+                            
                             if hasattr(content_block, 'input'):
                                 tool_input = content_block.input
+                                
+                                # Extract file path from different tool input formats
+                                file_path = None
+                                if isinstance(tool_input, dict):
+                                    file_path = tool_input.get('path') or tool_input.get('file_path')
+                                
                                 if tool_name == "Read":
-                                    file_path = tool_input.get('path', 'unknown')
-                                    logger.info(f"Claude reading file: {file_path}")
+                                    logger.info(f"Claude reading file: {file_path or 'unknown'}")
                                     if progress_callback:
-                                        progress_callback(f"Tool: Read - {file_path}")
+                                        progress_callback(f"Tool: Read - {file_path or 'unknown'}")
                                 elif tool_name == "Write":
-                                    file_path = tool_input.get('path', 'unknown')
-                                    logger.info(f"Claude writing file: {file_path}")
+                                    logger.info(f"Claude writing file: {file_path or 'unknown'}")
                                     if progress_callback:
-                                        progress_callback(f"Tool: Write - {file_path}")
+                                        progress_callback(f"Tool: Write - {file_path or 'unknown'}")
+                                elif tool_name == "Edit":
+                                    logger.info(f"Claude editing file: {file_path or 'unknown'}")
+                                    if progress_callback:
+                                        progress_callback(f"Tool: Edit - {file_path or 'unknown'}")
+                                else:
+                                    # Log other tools being used
+                                    logger.debug(f"Claude using {tool_name} with input: {tool_input}")
+                                    if progress_callback:
+                                        progress_callback(f"Tool: {tool_name}")
             
             # Log tool usage summary
             logger.info(f"Tool usage summary: {tool_usage}")
