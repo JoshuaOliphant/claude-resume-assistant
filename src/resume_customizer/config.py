@@ -46,6 +46,43 @@ class Settings(BaseSettings):
         description="Whether to preserve original formatting"
     )
     
+    # Claude SDK settings
+    model: str = Field(
+        default="claude-3-5-sonnet-20241022",
+        alias='RESUME_CLAUDE_MODEL',
+        description="Claude model to use"
+    )
+    
+    max_tokens: int = Field(
+        default=4096,
+        alias='RESUME_MAX_TOKENS',
+        description="Maximum tokens for Claude response"
+    )
+    
+    temperature: float = Field(
+        default=0.7,
+        alias='RESUME_TEMPERATURE',
+        description="Temperature for Claude responses"
+    )
+    
+    max_retries: int = Field(
+        default=3,
+        alias='RESUME_MAX_RETRIES',
+        description="Maximum number of retries for API calls"
+    )
+    
+    retry_delay: float = Field(
+        default=1.0,
+        alias='RESUME_RETRY_DELAY',
+        description="Initial delay between retries in seconds"
+    )
+    
+    timeout: int = Field(
+        default=30,
+        alias='RESUME_TIMEOUT',
+        description="Timeout for API calls in seconds"
+    )
+    
     @field_validator('claude_api_key')
     def validate_api_key(cls, v: str) -> str:
         """Validate that API key is not empty."""
@@ -73,6 +110,34 @@ class Settings(BaseSettings):
         valid_formats = ["markdown", "html", "pdf"]
         if v not in valid_formats:
             raise ValueError(f"output_format must be one of {valid_formats}")
+        return v
+    
+    @field_validator('temperature')
+    def validate_temperature(cls, v: float) -> float:
+        """Validate temperature is in valid range."""
+        if not 0 <= v <= 1:
+            raise ValueError("temperature must be between 0 and 1")
+        return v
+    
+    @field_validator('max_tokens')
+    def validate_max_tokens(cls, v: int) -> int:
+        """Validate max_tokens is positive."""
+        if v <= 0:
+            raise ValueError("max_tokens must be greater than 0")
+        return v
+    
+    @field_validator('timeout')
+    def validate_timeout(cls, v: int) -> int:
+        """Validate timeout is positive."""
+        if v <= 0:
+            raise ValueError("timeout must be greater than 0")
+        return v
+    
+    @field_validator('retry_delay')
+    def validate_retry_delay(cls, v: float) -> float:
+        """Validate retry_delay is positive."""
+        if v <= 0:
+            raise ValueError("retry_delay must be greater than 0")
         return v
 
 

@@ -416,7 +416,13 @@ Test file writing with various scenarios and permissions.
 ### Prompt 9: Claude Client Wrapper
 
 ```text
-Create a wrapper around Claude Code SDK for easier testing. Follow TDD:
+Create a wrapper around Claude Code SDK for easier testing. Feel free to browse the web for more information about the Claude SDK, these are good information sources:
+
+- "https://github.com/anthropics/claude-code-sdk-python/tree/main"
+- "https://docs.anthropic.com/en/docs/claude-code/sdk#python"
+
+
+ Follow TDD:
 
 1. Write tests for a ClaudeClient class that:
    - Initializes with API key from settings
