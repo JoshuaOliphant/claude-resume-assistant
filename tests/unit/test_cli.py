@@ -280,8 +280,8 @@ class TestCLI:
             ])
             
             assert result.exit_code == 0
-            # Click might use different spinner characters
-            assert any(char in result.output for char in ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏', 'Customizing'])
+            # Should show completion message
+            assert '✓' in result.output or 'Completed' in result.output
     
     def test_api_key_from_env(self, runner, temp_files):
         """Test that API key is loaded from environment."""

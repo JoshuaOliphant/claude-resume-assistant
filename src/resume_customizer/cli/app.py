@@ -16,6 +16,7 @@ from pydantic import ValidationError
 from resume_customizer.config import Settings
 from resume_customizer.core.customizer import ResumeCustomizer
 from resume_customizer.utils.logging import get_logger
+from resume_customizer.cli.progress import ProgressDisplay, ProgressStep, create_progress_callback
 
 
 logger = get_logger(__name__)
@@ -105,11 +106,6 @@ def customize(
         # Create customizer
         customizer = ResumeCustomizer(settings)
         
-        # Progress callback for verbose mode
-        def progress_callback(message: str):
-            if verbose:
-                click.echo(click.style('→ ', fg='blue') + message)
-        
         # Show initial message
         click.echo(click.style('Resume Customizer', fg='green', bold=True))
         click.echo(f'Resume: {resume}')
@@ -118,14 +114,14 @@ def customize(
         click.echo(f'Iterations: {iterations}')
         click.echo()
         
-        # Run customization with progress spinner
-        with click.progressbar(
-            length=1,
-            label='Customizing resume',
-            bar_template='%(label)s  %(bar)s',
-            show_percent=False,
-            show_pos=False
-        ) as bar:
+        # Use ProgressDisplay for better progress tracking
+        with ProgressDisplay(verbose=verbose) as progress:
+            # Create progress callback
+            progress_callback = create_progress_callback(progress)
+            
+            # Start with initialization
+            progress.update(ProgressStep.INITIALIZING)
+            
             # Run async function
             result = asyncio.run(
                 customizer.customize(
@@ -135,7 +131,9 @@ def customize(
                     progress_callback=progress_callback
                 )
             )
-            bar.update(1)
+            
+            # Mark as completed
+            progress.update(ProgressStep.COMPLETED)
         
         # Show success message
         click.echo()
