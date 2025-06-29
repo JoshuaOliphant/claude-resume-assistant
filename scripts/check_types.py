@@ -51,8 +51,13 @@ def analyze_file(file_path: Path) -> Dict[str, List[str]]:
         
         return {str(file_path): issues} if issues else {}
         
+    except SyntaxError as e:
+        return {str(file_path): [f"Syntax error in file: {e}"]}
+    except (IOError, OSError) as e:
+        return {str(file_path): [f"Error reading file: {e}"]}
     except Exception as e:
-        return {str(file_path): [f"Error analyzing file: {e}"]}
+        # Log unexpected errors but don't mask them
+        return {str(file_path): [f"Unexpected error analyzing file: {type(e).__name__}: {e}"]}
 
 
 def main():
