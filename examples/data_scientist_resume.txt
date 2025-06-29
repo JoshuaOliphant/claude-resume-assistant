@@ -1,0 +1,105 @@
+Dr. Emily Rodriguez
+Senior Data Scientist
+emily.rodriguez@email.com | (555) 987-6543 | Seattle, WA
+LinkedIn: linkedin.com/in/emily-rodriguez-phd | GitHub: github.com/erodriguez-data
+
+PROFESSIONAL SUMMARY
+Accomplished Data Scientist with 8+ years of experience applying machine learning and statistical analysis to solve complex business problems. PhD in Statistics with expertise in predictive modeling, deep learning, and big data analytics. Proven track record of deploying ML models that drive significant business value and revenue growth.
+
+WORK EXPERIENCE
+
+Senior Data Scientist
+TechGiant Corporation | Seattle, WA | March 2021 - Present
+• Lead a team of 4 data scientists developing recommendation systems serving 100M+ users
+• Designed and deployed deep learning model improving click-through rates by 23%, generating $12M additional annual revenue
+• Built end-to-end ML pipeline using TensorFlow and Kubernetes for real-time fraud detection
+• Reduced false positive rate by 35% while maintaining 99.5% fraud detection accuracy
+• Mentored junior data scientists and established best practices for model development and deployment
+• Presented findings to C-suite executives and translated complex analyses into actionable business strategies
+
+Data Scientist
+DataDriven Analytics | San Francisco, CA | June 2018 - February 2021
+• Developed customer churn prediction model using XGBoost achieving 92% accuracy
+• Created automated anomaly detection system for monitoring KPIs across 50+ business metrics
+• Built natural language processing pipeline for sentiment analysis of customer feedback
+• Implemented A/B testing framework that increased conversion rates by 15%
+• Collaborated with engineering team to productionize models using Docker and AWS SageMaker
+
+Machine Learning Engineer
+StartupML | San Francisco, CA | August 2016 - May 2018
+• Built computer vision model for product image classification using PyTorch
+• Developed time series forecasting models for demand prediction reducing inventory costs by 20%
+• Created data pipelines processing 1TB+ daily using Apache Spark and Airflow
+• Implemented feature engineering strategies improving model performance by 30%
+
+Research Assistant
+University of Washington | Seattle, WA | September 2012 - July 2016
+• Conducted research on Bayesian methods for high-dimensional data analysis
+• Published 5 peer-reviewed papers in top-tier journals
+• Developed novel statistical algorithms for genomic data analysis
+• Taught undergraduate statistics courses and supervised student research projects
+
+EDUCATION
+
+PhD in Statistics
+University of Washington | Seattle, WA | 2012 - 2016
+Dissertation: "Scalable Bayesian Methods for Big Data Analytics"
+GPA: 3.9/4.0
+
+Master of Science in Applied Mathematics
+University of California, Berkeley | Berkeley, CA | 2010 - 2012
+GPA: 3.8/4.0
+
+Bachelor of Science in Mathematics and Computer Science
+Stanford University | Stanford, CA | 2006 - 2010
+Summa Cum Laude, Phi Beta Kappa
+
+TECHNICAL SKILLS
+
+Programming Languages: Python, R, SQL, Scala, Java
+Machine Learning: TensorFlow, PyTorch, Scikit-learn, XGBoost, LightGBM, Keras
+Deep Learning: CNNs, RNNs, Transformers, GANs, Reinforcement Learning
+Big Data: Spark, Hadoop, Hive, Kafka, Airflow
+Cloud Platforms: AWS (SageMaker, EMR, Redshift), GCP (BigQuery, Vertex AI), Azure ML
+Databases: PostgreSQL, MySQL, MongoDB, Cassandra, Redis
+Visualization: Tableau, Power BI, Plotly, Matplotlib, Seaborn
+Statistics: Hypothesis Testing, Bayesian Inference, Time Series Analysis, Causal Inference
+Tools: Git, Docker, Kubernetes, MLflow, Jupyter, VS Code
+
+SELECTED PROJECTS & PUBLICATIONS
+
+Real-time Personalization Engine (2023)
+• Architected deep learning recommendation system processing 1M+ requests per second
+• Implemented multi-armed bandit algorithms for dynamic content optimization
+• Achieved 40% improvement in user engagement metrics
+
+"Scalable Variational Inference for Big Data Applications" 
+Journal of Machine Learning Research, 2022
+• Developed novel algorithm reducing computational complexity by O(n log n)
+• Open-sourced implementation with 500+ GitHub stars
+
+Customer Lifetime Value Prediction Platform (2021)
+• Built ensemble model combining survival analysis and deep learning
+• Improved CLV prediction accuracy by 35% compared to traditional methods
+• Deployed as microservice handling 10K+ predictions per minute
+
+CERTIFICATIONS & COURSES
+
+• AWS Certified Machine Learning - Specialty (2022)
+• Google Cloud Professional Machine Learning Engineer (2021)
+• Deep Learning Specialization - Coursera (2020)
+• Statistical Learning - Stanford Online (2019)
+
+LEADERSHIP & SPEAKING
+
+• Keynote Speaker, PyData Conference 2023 - "Scaling ML Systems in Production"
+• Technical Reviewer, O'Reilly Media - "Practical Deep Learning" book
+• Women in Data Science Mentor Program - Mentored 10+ aspiring data scientists
+• ML Study Group Organizer - Led weekly sessions on advanced ML topics
+
+AWARDS & RECOGNITION
+
+• Innovation Award, TechGiant Corporation (2023) - For fraud detection system
+• Best Paper Award, International Conference on Machine Learning (2021)
+• Graduate Research Fellowship, National Science Foundation (2013-2016)
+• Dean's Award for Academic Excellence, UC Berkeley (2012)

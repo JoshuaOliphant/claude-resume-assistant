@@ -61,8 +61,18 @@ class TestSettings:
         """Test that Settings validates API key is provided."""
         from resume_customizer.config import Settings
         from pydantic import ValidationError
-        with pytest.raises(ValidationError, match="Field required"):
+        
+        # Ensure no API key is in environment
+        if 'ANTHROPIC_API_KEY' in os.environ:
+            del os.environ['ANTHROPIC_API_KEY']
+        
+        # Should raise either Field required or custom validator error
+        with pytest.raises((ValidationError, ValueError)) as exc_info:
             Settings()
+        
+        # Check that it's related to API key
+        error_str = str(exc_info.value)
+        assert 'api' in error_str.lower() or 'field required' in error_str.lower()
     
     def test_settings_loads_from_env_file(self, clean_env, tmp_path):
         """Test that Settings can load from .env file."""

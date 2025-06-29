@@ -4,7 +4,7 @@
 """Configuration management for the resume customizer application."""
 
 import functools
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import Field, field_validator, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -91,7 +91,7 @@ class Settings(BaseSettings):
         return v
     
     @field_validator('claude_api_key', mode='before')
-    def check_api_key_exists(cls, v) -> str:
+    def check_api_key_exists(cls, v: Optional[str]) -> str:
         """Check that API key is provided."""
         if v is None:
             raise ValueError("API key is required")
