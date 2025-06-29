@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 @click.group()
 @click.version_option(version='0.1.0', prog_name='resume-customizer')
-def cli():
+def cli() -> None:
     """AI-powered resume customization tool using Claude Code SDK."""
     pass
 
@@ -64,7 +64,7 @@ def customize(
     output: Optional[str],
     iterations: int,
     verbose: bool
-):
+) -> None:
     """Customize a resume for a specific job application.
     
     This command reads your resume and a job description, then uses Claude
@@ -154,7 +154,7 @@ def customize(
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Main entry point for the CLI."""
     cli()
 

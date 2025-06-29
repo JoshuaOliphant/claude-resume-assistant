@@ -510,7 +510,6 @@ Implement the simplified ResumeCustomizer class. Follow TDD:
 1. Write tests for ResumeCustomizer that:
    - Validates input file paths exist
    - Calls ClaudeClient with file paths
-   - Monitors progress through callbacks
    - Verifies output file creation
    - Handles errors gracefully
 

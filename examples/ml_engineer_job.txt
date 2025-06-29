@@ -1,0 +1,79 @@
+Machine Learning Engineer - AI-First Healthcare Platform
+
+Company: HealthAI Technologies
+Location: Boston, MA (Hybrid) or Remote
+
+About HealthAI Technologies:
+HealthAI is revolutionizing healthcare through cutting-edge artificial intelligence. Our platform helps healthcare providers make better decisions, improve patient outcomes, and reduce costs. We're processing millions of patient records daily and need talented ML Engineers to help us scale our AI capabilities.
+
+The Role:
+We're seeking a Machine Learning Engineer to join our core AI team. You'll work on developing and deploying machine learning models that directly impact patient care. This role combines cutting-edge ML research with practical engineering to build reliable, scalable systems that healthcare providers trust with their patients' lives.
+
+Core Responsibilities:
+• Design, develop, and deploy machine learning models for clinical decision support
+• Build scalable ML pipelines processing millions of healthcare records in real-time
+• Implement deep learning models for medical image analysis and natural language processing
+• Collaborate with clinical experts to ensure models are medically accurate and useful
+• Optimize model performance for low-latency inference in production environments
+• Develop monitoring and alerting systems for model performance and data drift
+• Conduct rigorous testing and validation of models to ensure safety and reliability
+• Work with cross-functional teams including data engineers, clinicians, and product managers
+• Stay current with latest ML research in healthcare and implement relevant advances
+
+Required Qualifications:
+• 3+ years of experience in machine learning engineering or related field
+• Strong programming skills in Python and experience with ML frameworks (TensorFlow, PyTorch)
+• Experience deploying ML models to production at scale
+• Solid understanding of machine learning algorithms and statistical methods
+• Experience with cloud platforms (AWS, GCP, or Azure) and containerization (Docker, Kubernetes)
+• Knowledge of ML ops best practices and tools (MLflow, Kubeflow, or similar)
+• Experience with distributed computing frameworks (Spark, Ray, or Dask)
+• Strong software engineering practices including version control, testing, and CI/CD
+• Bachelor's degree in Computer Science, Engineering, or related field (Master's preferred)
+
+Preferred Qualifications:
+• Experience with healthcare data (EHR, claims, imaging) and standards (HL7, FHIR)
+• Knowledge of medical terminology and clinical workflows
+• Experience with privacy-preserving ML techniques (federated learning, differential privacy)
+• Background in deep learning for computer vision or NLP
+• Experience with real-time ML systems and edge deployment
+• Publications in ML/AI conferences or journals
+• Experience with regulatory compliance (HIPAA, FDA) for AI in healthcare
+
+Technical Environment:
+• Languages: Python (primary), Go, SQL
+• ML Frameworks: PyTorch, TensorFlow, Scikit-learn, XGBoost
+• Infrastructure: Kubernetes, Docker, Airflow, Kafka
+• Cloud: AWS (SageMaker, EKS, Lambda)
+• Data: PostgreSQL, MongoDB, S3, Snowflake
+• Monitoring: Prometheus, Grafana, Weights & Biases
+• Version Control: Git, GitHub
+
+What Makes This Role Unique:
+• Direct impact on patient care and clinical outcomes
+• Work with cutting-edge AI technology in healthcare
+• Access to large-scale, real-world healthcare datasets
+• Collaboration with leading clinicians and researchers
+• Opportunity to publish research and attend conferences
+• Solve challenging technical problems with real-world constraints
+
+Compensation & Benefits:
+• Base Salary: $140,000 - $180,000 (based on experience)
+• Equity package with high growth potential
+• Comprehensive health, dental, and vision insurance
+• $2,500 annual learning & development budget
+• Flexible work arrangements
+• Unlimited PTO policy
+• 401(k) with company match
+• Parental leave policy
+• Wellness stipend
+
+Our Commitment:
+HealthAI Technologies is committed to building a diverse and inclusive team. We believe that diverse perspectives lead to better products and outcomes for our users. We strongly encourage applications from candidates of all backgrounds.
+
+Required Legal Authorizations:
+• Must be authorized to work in the United States
+• Some positions may require HIPAA certification
+
+To Apply:
+Please submit your resume along with a cover letter explaining your interest in healthcare AI and any relevant projects or research you've conducted. Include links to your GitHub, publications, or portfolio if applicable.

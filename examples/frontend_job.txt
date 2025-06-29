@@ -1,0 +1,70 @@
+Senior Frontend Engineer - SaaS Platform
+
+About TechVision Solutions:
+TechVision Solutions is a fast-growing B2B SaaS company providing innovative project management and collaboration tools to enterprises worldwide. Our platform serves over 10,000 companies and millions of users daily. We're looking for a Senior Frontend Engineer to help us build the next generation of our web application.
+
+Role Overview:
+As a Senior Frontend Engineer, you'll be responsible for architecting and implementing user-facing features that delight our customers. You'll work closely with our product and design teams to create intuitive, performant, and accessible web applications. This is a high-impact role where you'll influence the technical direction of our frontend architecture.
+
+Key Responsibilities:
+• Lead the development of complex frontend features using modern JavaScript frameworks
+• Architect scalable and maintainable frontend solutions for our SaaS platform
+• Collaborate with UX/UI designers to implement pixel-perfect, responsive designs
+• Optimize application performance, ensuring fast load times and smooth interactions
+• Mentor junior developers and conduct thorough code reviews
+• Champion best practices in frontend development, testing, and accessibility
+• Work with backend engineers to design efficient APIs and data flows
+• Participate in technical planning and contribute to architectural decisions
+• Stay current with frontend technologies and advocate for adoption of new tools
+
+Required Qualifications:
+• 5+ years of professional frontend development experience
+• Expert-level proficiency in React, TypeScript, and modern JavaScript (ES6+)
+• Strong experience with state management solutions (Redux, MobX, or Context API)
+• Deep understanding of CSS/SASS and modern CSS frameworks
+• Experience building responsive, mobile-first web applications
+• Proven track record of optimizing frontend performance and Core Web Vitals
+• Experience with modern build tools (Webpack, Vite, or similar)
+• Strong understanding of web accessibility standards (WCAG 2.1)
+• Experience with frontend testing frameworks (Jest, React Testing Library, Cypress)
+• Excellent problem-solving skills and attention to detail
+
+Preferred Qualifications:
+• Experience with micro-frontend architecture
+• Knowledge of GraphQL and Apollo Client
+• Experience with design systems and component libraries
+• Familiarity with server-side rendering (Next.js or similar)
+• Experience with real-time features (WebSockets, WebRTC)
+• Contributions to open-source projects
+• Experience with A/B testing and feature flags
+• Background in visual design or UX
+
+Technical Stack:
+• Frontend: React 18, TypeScript, Redux Toolkit, Styled Components
+• Testing: Jest, React Testing Library, Cypress, Storybook
+• Build Tools: Webpack 5, Babel, ESLint, Prettier
+• Design: Figma, Custom Design System
+• Infrastructure: AWS CloudFront, S3, Docker
+• CI/CD: GitHub Actions, Vercel
+• Monitoring: Sentry, DataDog, Google Analytics
+
+What We Offer:
+• Competitive salary: $150,000 - $190,000
+• Equity compensation package
+• Comprehensive health, dental, and vision coverage
+• $1,500 annual professional development budget
+• Flexible work schedule and remote-first culture
+• Latest MacBook Pro and ergonomic desk setup
+• 4 weeks PTO + company holidays
+• Quarterly team offsites
+
+Our Values:
+• User-obsessed: We put our users at the center of everything we do
+• Quality-driven: We take pride in crafting excellent software
+• Collaborative: We believe the best solutions come from diverse perspectives
+• Innovative: We encourage experimentation and learning from failures
+• Inclusive: We're committed to building a diverse and welcoming team
+
+Location: Remote (US timezones preferred) or San Francisco, CA
+
+Equal Opportunity Employer: TechVision Solutions is committed to creating a diverse environment and is proud to be an equal opportunity employer.

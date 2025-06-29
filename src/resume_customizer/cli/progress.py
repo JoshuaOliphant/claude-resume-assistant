@@ -6,7 +6,7 @@
 import time
 import threading
 from enum import Enum, auto
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict, Callable
 from datetime import datetime
 
 import click
@@ -72,7 +72,7 @@ class ProgressDisplay:
         # Create step message mapping
         self._step_messages = {step: msg for step, msg in self.steps}
     
-    def start(self):
+    def start(self) -> None:
         """Start the progress display."""
         with self._lock:
             if self._running:
@@ -82,7 +82,7 @@ class ProgressDisplay:
             self._thread = threading.Thread(target=self._display_loop, daemon=True)
             self._thread.start()
     
-    def stop(self):
+    def stop(self) -> None:
         """Stop the progress display."""
         with self._lock:
             self._running = False
@@ -103,7 +103,7 @@ class ProgressDisplay:
                 fg='green'
             ))
     
-    def update(self, step: ProgressStep):
+    def update(self, step: ProgressStep) -> None:
         """Update the current progress step."""
         with self._lock:
             # Track step duration
@@ -118,7 +118,7 @@ class ProgressDisplay:
                 message = self.get_step_message(step)
                 click.echo(click.style(f"→ {message}", fg='blue'))
     
-    def add_detail(self, detail: str):
+    def add_detail(self, detail: str) -> None:
         """Add a detail message (shown in verbose mode)."""
         with self._lock:
             self._details.append(detail)
@@ -126,7 +126,7 @@ class ProgressDisplay:
         if self.verbose:
             click.echo(f"  {detail}")
     
-    def error(self, message: str):
+    def error(self, message: str) -> None:
         """Mark an error occurred."""
         with self._lock:
             self._error = True
@@ -174,7 +174,7 @@ class ProgressDisplay:
         """Get duration of a specific step."""
         return self._step_times.get(step, 0.0)
     
-    def clear_line(self):
+    def clear_line(self) -> None:
         """Clear the current line."""
         click.echo('\r\033[K', nl=False)
     
@@ -226,7 +226,7 @@ class ProgressDisplay:
         return False
 
 
-def create_progress_callback(progress_display: ProgressDisplay):
+def create_progress_callback(progress_display: ProgressDisplay) -> Callable[[str], None]:
     """
     Create a progress callback function for use with ResumeCustomizer.
     
@@ -236,7 +236,7 @@ def create_progress_callback(progress_display: ProgressDisplay):
     Returns:
         Callback function that updates progress based on messages
     """
-    def callback(message: str):
+    def callback(message: str) -> None:
         """Progress callback that interprets messages and updates display."""
         message_lower = message.lower()
         
