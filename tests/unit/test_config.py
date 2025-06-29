@@ -57,8 +57,11 @@ class TestSettings:
         with pytest.raises(ValueError, match="API key cannot be empty"):
             Settings()
     
-    def test_settings_validates_missing_api_key(self, clean_env):
+    def test_settings_validates_missing_api_key(self, clean_env, tmp_path, monkeypatch):
         """Test that Settings validates API key is provided."""
+        # Change to a temporary directory without .env file
+        monkeypatch.chdir(tmp_path)
+        
         from resume_customizer.config import Settings
         from pydantic import ValidationError
         
@@ -66,13 +69,13 @@ class TestSettings:
         if 'ANTHROPIC_API_KEY' in os.environ:
             del os.environ['ANTHROPIC_API_KEY']
         
-        # Should raise either Field required or custom validator error
-        with pytest.raises((ValidationError, ValueError)) as exc_info:
+        # Should raise ValidationError for missing API key
+        with pytest.raises(ValidationError) as exc_info:
             Settings()
         
-        # Check that it's related to API key
+        # Check that it's related to API key field
         error_str = str(exc_info.value)
-        assert 'api' in error_str.lower() or 'field required' in error_str.lower()
+        assert "ANTHROPIC_API_KEY" in error_str and "Field required" in error_str
     
     def test_settings_loads_from_env_file(self, clean_env, tmp_path):
         """Test that Settings can load from .env file."""
