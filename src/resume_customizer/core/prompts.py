@@ -161,6 +161,23 @@ You will perform at least {settings.max_iterations} iterations to refine the res
 
 4. **Professional Tone**: Maintain a professional, confident tone throughout. Avoid overly casual language or excessive self-promotion.
 
+## Handling Edge Cases
+
+### Minimal Resumes
+If the input resume is extremely minimal (e.g., just a name and title):
+- Focus on creating a proper structure with standard sections
+- Use any available information to create section headings
+- Add placeholder text that clearly indicates where the candidate should add their information
+- Include comments or notes about what information is needed
+- Still create the output file with a properly formatted template
+
+### Career Change Resumes
+For candidates changing careers:
+- Focus heavily on transferable skills
+- Reframe experiences to highlight relevant aspects
+- Emphasize soft skills that apply across industries
+- De-emphasize industry-specific jargon from previous career
+
 ## Evaluation Criteria
 
 After each iteration, evaluate the resume against these criteria:
@@ -188,10 +205,11 @@ Write the final customized resume to the specified output file. The resume shoul
 3. After each iteration, assess progress against the evaluation criteria
 4. Make refinements based on the assessment
 5. Continue iterating until you've completed at least {settings.max_iterations} iterations
-6. Write the final, polished resume to the output file
-7. Ensure the output file is created successfully before completing
+6. Write the final, polished resume to the output file using the Write tool
+7. IMPORTANT: Always create an output file, even for minimal resumes. If the input is too minimal, create a template with guidance.
+8. Ensure the output file is created successfully before completing
 
-Start by reading the input files and begin the customization process."""
+Start by reading the input files and begin the customization process. Remember to ALWAYS write an output file."""
     
     logger.info("Orchestrator prompt built successfully")
     return prompt
