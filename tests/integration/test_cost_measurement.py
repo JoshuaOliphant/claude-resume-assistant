@@ -171,9 +171,14 @@ We are looking for an experienced software engineer to join our team.
         print(f"Total cost for {len(sizes)} resumes: ${results['summary']['total_cost']:.4f}")
         print(f"Cost range: ${results['summary']['min_cost']:.4f} - ${results['summary']['max_cost']:.4f}")
         
-        # Assert costs are reasonable
-        assert results['summary']['average_cost'] < 0.50, "Average cost should be under $0.50"
-        assert results['summary']['max_cost'] < 1.00, "Max cost should be under $1.00"
+        # Assert costs are reasonable (configurable thresholds)
+        max_avg_cost = float(os.getenv('MAX_AVERAGE_COST', '0.50'))
+        max_single_cost = float(os.getenv('MAX_SINGLE_COST', '1.00'))
+        
+        assert results['summary']['average_cost'] < max_avg_cost, \
+            f"Average cost ${results['summary']['average_cost']:.4f} should be under ${max_avg_cost}"
+        assert results['summary']['max_cost'] < max_single_cost, \
+            f"Max cost ${results['summary']['max_cost']:.4f} should be under ${max_single_cost}"
     
     @pytest.mark.asyncio
     async def test_cost_by_iterations(self, temp_test_environment, cost_results_dir):

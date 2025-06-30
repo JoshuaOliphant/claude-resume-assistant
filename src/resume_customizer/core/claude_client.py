@@ -41,6 +41,8 @@ class ClaudeClient:
             raise ValueError("Claude API key is required")
         
         self.settings = settings
+        self.model_name = getattr(settings, 'model_name', 'claude-sonnet-4-0')
+        self.max_history_requests = getattr(settings, 'max_history_requests', 100)
         self.usage_stats = {
             "total_input_tokens": 0,
             "total_output_tokens": 0,
@@ -97,7 +99,7 @@ class ClaudeClient:
             allowed_tools=["Read", "Write", "Edit", "TodoWrite", "TodoRead"],  # Include all tools Claude might use
             system_prompt=self.settings.system_prompt if hasattr(self.settings, 'system_prompt') else None,
             cwd=Path.cwd(),  # Set working directory
-            model="claude-sonnet-4-0"  # Specify the model to use
+            model=self.model_name  # Use configurable model
         )
         
         logger.info(f"Starting resume customization with Claude Code SDK")
@@ -120,6 +122,7 @@ class ClaudeClient:
                     if hasattr(message, 'usage') and message.usage:
                         usage_data = message.usage
                         if isinstance(usage_data, dict):
+                            # Track all token types - note that cache tokens may have different pricing
                             request_tokens["input"] = usage_data.get('input_tokens', 0) + \
                                                     usage_data.get('cache_creation_input_tokens', 0) + \
                                                     usage_data.get('cache_read_input_tokens', 0)
@@ -189,7 +192,7 @@ class ClaudeClient:
                     output_cost = 0.0
             else:
                 # Fallback to manual calculation
-                model_pricing = CLAUDE_PRICING.get("claude-sonnet-4-0", {"input": 3.0, "output": 15.0})
+                model_pricing = CLAUDE_PRICING.get(self.model_name, {"input": 3.0, "output": 15.0})
                 input_cost = (request_tokens["input"] / 1_000_000) * model_pricing["input"]
                 output_cost = (request_tokens["output"] / 1_000_000) * model_pricing["output"]
                 total_cost = input_cost + output_cost
@@ -205,6 +208,10 @@ class ClaudeClient:
                 "output_tokens": request_tokens["output"],
                 "cost": total_cost
             })
+            
+            # Clean up old requests to prevent memory leak
+            if len(self.usage_stats["requests"]) > self.max_history_requests:
+                self.usage_stats["requests"] = self.usage_stats["requests"][-self.max_history_requests:]
             
             logger.info(f"Token usage - Input: {request_tokens['input']:,}, Output: {request_tokens['output']:,}")
             logger.info(f"Request cost: ${total_cost:.4f} (Input: ${input_cost:.4f}, Output: ${output_cost:.4f})")
