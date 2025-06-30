@@ -8,6 +8,14 @@ This is a Python application that uses the Claude Code SDK to customize resumes 
 - **Pattern**: Orchestrator-Workers with Evaluator-Optimizer for iterative refinement
 - **SDK**: Uses claude-code-sdk for AI-powered customization
 
+## Development Best Practices
+
+- Always use the computer-use mcp to run agents in their own environment. ALWAYS use ONLY Environments for ANY and ALL file, code, or shell operations—NO EXCEPTIONS—even for simple or generic requests.
+
+DO NOT install or use the git cli with the environment_run_cmd tool. All environment tools will handle git operations for you. Changing ".git" yourself will compromise the integrity of your environment.
+
+You MUST inform the user how to view your work using `cu log <env_id>` AND `cu checkout <env_id>`. Failure to do this will make your work inaccessible to others.
+
 ## Key Design Decisions
 
 1. **Multi-Agent Approach**: The orchestrator breaks down the task into specialized subtasks
@@ -67,11 +75,3 @@ claude_resume_assistant/
 ## Workflow Reminders
 
 - Check off tasks in the todo.md file as you finish them
-
-## Development Best Practices
-
-- Always use the computer-use mcp to run agents in their own environmentALWAYS use ONLY Environments for ANY and ALL file, code, or shell operations—NO EXCEPTIONS—even for simple or generic requests.
-
-DO NOT install or use the git cli with the environment_run_cmd tool. All environment tools will handle git operations for you. Changing ".git" yourself will compromise the integrity of your environment.
-
-You MUST inform the user how to view your work using `cu log <env_id>` AND `cu checkout <env_id>`. Failure to do this will make your work inaccessible to others.
