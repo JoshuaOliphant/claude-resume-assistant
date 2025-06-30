@@ -67,3 +67,7 @@ claude_resume_assistant/
 ## Workflow Reminders
 
 - Check off tasks in the todo.md file as you finish them
+
+## Development Best Practices
+
+- Always use the computer-use mcp to run agents in their own environment

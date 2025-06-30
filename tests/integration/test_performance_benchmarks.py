@@ -88,12 +88,25 @@ class TestPerformanceBenchmarks:
             
             duration = end_time - start_time
             
+            # Get cost information
+            usage_stats = customizer.claude_client.get_usage_stats()
+            if usage_stats["requests"]:
+                last_request = usage_stats["requests"][-1]
+                cost_info = {
+                    "cost": last_request["cost"],
+                    "input_tokens": last_request["input_tokens"],
+                    "output_tokens": last_request["output_tokens"]
+                }
+            else:
+                cost_info = {"cost": 0.0, "input_tokens": 0, "output_tokens": 0}
+            
             results[label] = {
                 "duration_seconds": duration,
                 "memory_delta_mb": memory_delta,
                 "input_size": len(Path(resume_path).read_text()) + len(Path(job_path).read_text()),
                 "output_size": len(output_path.read_text()),
-                "passed": duration <= expected_max_time
+                "passed": duration <= expected_max_time,
+                **cost_info
             }
             
             # Assert performance is reasonable
@@ -104,6 +117,7 @@ class TestPerformanceBenchmarks:
             print(f"  Duration: {duration:.2f}s")
             print(f"  Memory delta: {memory_delta:.2f} MB")
             print(f"  Output size: {results[label]['output_size']} chars")
+            print(f"  Cost: ${results[label]['cost']:.4f} ({results[label]['input_tokens']:,} + {results[label]['output_tokens']:,} tokens)")
         
         # Save results
         self.save_benchmark_results(results, "baseline_performance", benchmark_results_dir)
@@ -400,8 +414,15 @@ class TestPerformanceBenchmarks:
         
         summary = {
             "generated_at": datetime.now().isoformat(),
-            "benchmarks": {}
+            "benchmarks": {},
+            "cost_summary": {
+                "total_cost": 0.0,
+                "total_requests": 0,
+                "average_cost_per_request": 0.0
+            }
         }
+        
+        total_costs = []
         
         for file in benchmark_files:
             with open(file) as f:
@@ -409,6 +430,18 @@ class TestPerformanceBenchmarks:
                 
             benchmark_name = file.stem.split('_20')[0]  # Remove timestamp
             summary["benchmarks"][benchmark_name] = data
+            
+            # Extract costs from different benchmark types
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    if isinstance(value, dict) and "cost" in value:
+                        total_costs.append(value["cost"])
+        
+        # Calculate cost summary
+        if total_costs:
+            summary["cost_summary"]["total_cost"] = sum(total_costs)
+            summary["cost_summary"]["total_requests"] = len(total_costs)
+            summary["cost_summary"]["average_cost_per_request"] = sum(total_costs) / len(total_costs)
         
         # Save summary
         summary_file = benchmark_results_dir / "benchmark_summary.json"
@@ -417,3 +450,9 @@ class TestPerformanceBenchmarks:
         
         print(f"\nBenchmark summary saved to: {summary_file}")
         print(f"Total benchmarks: {len(summary['benchmarks'])}")
+        
+        if total_costs:
+            print(f"\nCost Summary:")
+            print(f"  Total API cost: ${summary['cost_summary']['total_cost']:.4f}")
+            print(f"  Average cost per resume: ${summary['cost_summary']['average_cost_per_request']:.4f}")
+            print(f"  Total requests: {summary['cost_summary']['total_requests']}")
