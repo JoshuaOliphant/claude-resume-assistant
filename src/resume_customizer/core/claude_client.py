@@ -3,8 +3,9 @@
 
 """Claude Code SDK wrapper for resume customization."""
 
+import time
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, Any
 
 from claude_code_sdk import query, ClaudeCodeOptions
 from resume_customizer.config import Settings
@@ -13,6 +14,14 @@ from resume_customizer.core.prompts import build_orchestrator_prompt
 
 
 logger = get_logger(__name__)
+
+# Pricing information for Claude models (per 1M tokens)
+CLAUDE_PRICING = {
+    "claude-sonnet-4-0": {
+        "input": 3.00,   # $3.00 per 1M input tokens
+        "output": 15.00  # $15.00 per 1M output tokens
+    }
+}
 
 
 class ClaudeClient:
@@ -32,6 +41,12 @@ class ClaudeClient:
             raise ValueError("Claude API key is required")
         
         self.settings = settings
+        self.usage_stats = {
+            "total_input_tokens": 0,
+            "total_output_tokens": 0,
+            "total_cost": 0.0,
+            "requests": []
+        }
         logger.info("ClaudeClient initialized with Claude Code SDK")
     
     async def customize_resume(
@@ -81,7 +96,8 @@ class ClaudeClient:
             max_turns=10,  # Allow multiple turns for Claude to complete the task
             allowed_tools=["Read", "Write", "Edit", "TodoWrite", "TodoRead"],  # Include all tools Claude might use
             system_prompt=self.settings.system_prompt if hasattr(self.settings, 'system_prompt') else None,
-            cwd=Path.cwd()  # Set working directory
+            cwd=Path.cwd(),  # Set working directory
+            model="claude-sonnet-4-0"  # Specify the model to use
         )
         
         logger.info(f"Starting resume customization with Claude Code SDK")
@@ -89,12 +105,31 @@ class ClaudeClient:
         logger.debug(f"Job Description: {job_description_path}")
         logger.debug(f"Output: {output_path}")
         
-        # Track tool usage
+        # Track tool usage and request metrics
         tool_usage = {"Read": 0, "Write": 0}
+        request_tokens = {"input": 0, "output": 0}
+        request_start_time = time.time()
+        final_cost_usd = None
         
         try:
             # Process messages from Claude
             async for message in query(prompt=prompt, options=options):
+                # Handle ResultMessage which comes at the end
+                if hasattr(message, 'total_cost_usd') and hasattr(message, 'usage'):
+                    # This is the final ResultMessage with complete usage info
+                    if hasattr(message, 'usage') and message.usage:
+                        usage_data = message.usage
+                        if isinstance(usage_data, dict):
+                            request_tokens["input"] = usage_data.get('input_tokens', 0) + \
+                                                    usage_data.get('cache_creation_input_tokens', 0) + \
+                                                    usage_data.get('cache_read_input_tokens', 0)
+                            request_tokens["output"] = usage_data.get('output_tokens', 0)
+                        
+                    if hasattr(message, 'total_cost_usd'):
+                        final_cost_usd = message.total_cost_usd
+                        logger.info(f"API cost from SDK: ${final_cost_usd:.6f}")
+                        logger.debug(f"Full usage data: {message.usage if hasattr(message, 'usage') else 'None'}")
+                
                 # Log progress
                 if hasattr(message, 'content') and message.content:
                     for content_block in message.content:
@@ -141,6 +176,43 @@ class ClaudeClient:
             # Log tool usage summary
             logger.info(f"Tool usage summary: {tool_usage}")
             
+            # Use SDK-provided cost if available, otherwise calculate
+            if final_cost_usd is not None:
+                total_cost = final_cost_usd
+                # Calculate input/output costs based on token ratio
+                if request_tokens["input"] + request_tokens["output"] > 0:
+                    input_ratio = request_tokens["input"] / (request_tokens["input"] + request_tokens["output"])
+                    input_cost = total_cost * input_ratio
+                    output_cost = total_cost * (1 - input_ratio)
+                else:
+                    input_cost = 0.0
+                    output_cost = 0.0
+            else:
+                # Fallback to manual calculation
+                model_pricing = CLAUDE_PRICING.get("claude-sonnet-4-0", {"input": 3.0, "output": 15.0})
+                input_cost = (request_tokens["input"] / 1_000_000) * model_pricing["input"]
+                output_cost = (request_tokens["output"] / 1_000_000) * model_pricing["output"]
+                total_cost = input_cost + output_cost
+            
+            # Update usage statistics
+            self.usage_stats["total_input_tokens"] += request_tokens["input"]
+            self.usage_stats["total_output_tokens"] += request_tokens["output"]
+            self.usage_stats["total_cost"] += total_cost
+            self.usage_stats["requests"].append({
+                "resume_path": resume_path,
+                "job_path": job_description_path,
+                "input_tokens": request_tokens["input"],
+                "output_tokens": request_tokens["output"],
+                "cost": total_cost
+            })
+            
+            logger.info(f"Token usage - Input: {request_tokens['input']:,}, Output: {request_tokens['output']:,}")
+            logger.info(f"Request cost: ${total_cost:.4f} (Input: ${input_cost:.4f}, Output: ${output_cost:.4f})")
+            if final_cost_usd is not None:
+                logger.info(f"Cost source: SDK-provided (total_cost_usd)")
+            else:
+                logger.info(f"Cost source: Calculated from token counts")
+            
             # Verify output file was created
             if not Path(output_path).exists():
                 warning_msg = f"Warning: Output file was not created at {output_path}"
@@ -152,8 +224,39 @@ class ClaudeClient:
                 logger.info(success_msg)
                 if progress_callback:
                     progress_callback(success_msg)
+                    progress_callback(f"Cost: ${total_cost:.4f} ({request_tokens['input']:,} input + {request_tokens['output']:,} output tokens)")
                     
         except Exception as e:
             logger.error(f"Error during resume customization: {str(e)}")
             raise
     
+    def get_usage_stats(self) -> Dict[str, Any]:
+        """
+        Get current usage statistics.
+        
+        Returns:
+            Dictionary containing token usage and cost information
+        """
+        return self.usage_stats.copy()
+    
+    def reset_usage_stats(self) -> None:
+        """Reset usage statistics to zero."""
+        self.usage_stats = {
+            "total_input_tokens": 0,
+            "total_output_tokens": 0,
+            "total_cost": 0.0,
+            "requests": []
+        }
+        logger.info("Usage statistics reset")
+    
+    def get_average_cost_per_resume(self) -> float:
+        """
+        Calculate average cost per resume customization.
+        
+        Returns:
+            Average cost in dollars
+        """
+        if not self.usage_stats["requests"]:
+            return 0.0
+        
+        return self.usage_stats["total_cost"] / len(self.usage_stats["requests"])
