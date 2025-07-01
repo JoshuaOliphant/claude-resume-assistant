@@ -173,7 +173,7 @@ class OutputWriter:
             content: Content to validate
             
         Returns:
-            True if valid, False otherwise
+            True if valid (not None and not whitespace-only), False otherwise
         """
         if content is None:
             return False

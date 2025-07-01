@@ -15,6 +15,9 @@ from resume_customizer.core.prompts import build_orchestrator_prompt
 
 logger = get_logger(__name__)
 
+# Maximum allowed history requests to prevent memory issues
+MAX_HISTORY_REQUESTS_LIMIT = 1000
+
 # Pricing information for Claude models (per 1M tokens)
 CLAUDE_PRICING = {
     "claude-sonnet-4-0": {
@@ -43,7 +46,7 @@ class ClaudeClient:
         self.settings = settings
         self.model_name = getattr(settings, 'model_name', 'claude-sonnet-4-0')
         # Cap max_history_requests to prevent memory issues
-        self.max_history_requests = min(getattr(settings, 'max_history_requests', 100), 1000)
+        self.max_history_requests = min(getattr(settings, 'max_history_requests', 100), MAX_HISTORY_REQUESTS_LIMIT)
         self.usage_stats = {
             "total_input_tokens": 0,
             "total_output_tokens": 0,
