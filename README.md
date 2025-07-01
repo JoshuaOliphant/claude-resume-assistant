@@ -297,8 +297,73 @@ uv run python resume_customizer.py -r resume.md -j job.txt -v
 - **Local Processing**: Files never leave your machine except for API calls
 - **API Key Safety**: Never commit API keys to version control
 
+## Cost Management
+
+### Budget Tracking & Export (✅ Issue #8)
+
+The Resume Customizer now includes comprehensive cost tracking and budget management:
+
+#### Setting Budgets
+```bash
+# Set daily spending limit
+uv run python resume_customizer.py cost set-budget --daily 5.00
+
+# Set monthly spending limit  
+uv run python resume_customizer.py cost set-budget --monthly 50.00
+
+# Set both
+uv run python resume_customizer.py cost set-budget --daily 5.00 --monthly 50.00
+```
+
+#### Monitoring Costs
+```bash
+# View current status and spending
+uv run python resume_customizer.py cost status
+
+# View usage summary for last 30 days
+uv run python resume_customizer.py cost summary --days 30
+
+# View 7-day summary
+uv run python resume_customizer.py cost summary --days 7
+```
+
+#### Exporting Data
+```bash
+# Export to CSV (all data)
+uv run python resume_customizer.py cost export csv costs.csv
+
+# Export to JSON (last 30 days)
+uv run python resume_customizer.py cost export json report.json --days 30
+
+# Export last 7 days to CSV
+uv run python resume_customizer.py cost export csv weekly.csv --days 7
+```
+
+#### Budget Enforcement
+- Automatic budget checking before API calls
+- 80% budget threshold warnings
+- Hard budget limits with override option
+- Real-time cost calculation using current Claude API pricing
+
+#### Standalone Cost Tracker
+```bash
+# Use the standalone cost tracker
+python cost_tracker_cli.py status
+python cost_tracker_cli.py set-budget --daily 5.00
+python cost_tracker_cli.py export csv costs.csv
+```
+
+### Features
+- 📊 **Real-time Cost Tracking** - Accurate cost calculation for all Claude models
+- 💰 **Budget Management** - Set daily and monthly spending limits
+- ⚠️ **Smart Alerts** - Warnings at 80% budget threshold
+- 📁 **Data Export** - Export usage data to CSV or JSON formats
+- 📈 **Usage Analytics** - Detailed summaries by model and operation type
+- 🔒 **Privacy First** - All data stored locally in your home directory
+
 ## Roadmap
 
+- [x] Cost budgets and export functionality (Issue #8)
 - [ ] Web interface with real-time preview
 - [ ] Support for PDF input/output
 - [ ] Multiple resume templates

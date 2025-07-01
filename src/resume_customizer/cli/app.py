@@ -17,6 +17,7 @@ from resume_customizer.config import Settings
 from resume_customizer.core.customizer import ResumeCustomizer
 from resume_customizer.utils.logging import get_logger
 from resume_customizer.cli.progress import ProgressDisplay, ProgressStep, create_progress_callback
+from resume_customizer.cost_tracker import CostTracker
 
 
 logger = get_logger(__name__)
@@ -58,12 +59,18 @@ def cli() -> None:
     is_flag=True,
     help='Show detailed progress information'
 )
+@click.option(
+    '--skip-budget-check',
+    is_flag=True,
+    help='Skip budget validation before API calls'
+)
 def customize(
     resume: str,
     job: str,
     output: Optional[str],
     iterations: int,
-    verbose: bool
+    verbose: bool,
+    skip_budget_check: bool
 ) -> None:
     """Customize a resume for a specific job application.
     
@@ -100,6 +107,24 @@ def customize(
         sys.exit(1)
     
     try:
+        # Initialize cost tracker
+        cost_tracker = CostTracker()
+        
+        # Check budget before proceeding (unless skipped)
+        if not skip_budget_check:
+            can_proceed, warnings = cost_tracker.can_make_api_call()
+            if not can_proceed:
+                click.echo(click.style('✗ Budget Check Failed:', fg='red', bold=True))
+                for warning in warnings:
+                    click.echo(f'  {warning}')
+                click.echo('\nUse --skip-budget-check to override budget limits.')
+                sys.exit(1)
+            elif warnings:
+                click.echo(click.style('⚠️  Budget Warnings:', fg='yellow', bold=True))
+                for warning in warnings:
+                    click.echo(f'  {warning}')
+                click.echo()
+        
         # Create settings
         settings = Settings(max_iterations=iterations)
         
@@ -152,6 +177,78 @@ def customize(
         click.echo(click.style('✗ Error: ', fg='red') + str(e), err=True)
         logger.error(f"Customization failed: {str(e)}", exc_info=True)
         sys.exit(1)
+
+
+@cli.group()
+def cost() -> None:
+    """Cost tracking and budget management commands."""
+    pass
+
+
+@cost.command('status')
+def cost_status() -> None:
+    """Show current cost and budget status."""
+    tracker = CostTracker()
+    tracker.display_status()
+
+
+@cost.command('set-budget')
+@click.option('--daily', type=float, help='Set daily budget in USD')
+@click.option('--monthly', type=float, help='Set monthly budget in USD')
+def cost_set_budget(daily: Optional[float], monthly: Optional[float]) -> None:
+    """Set daily or monthly spending budget."""
+    if not daily and not monthly:
+        click.echo(click.style('✗ Error: ', fg='red') + 'Please specify --daily or --monthly budget amount')
+        sys.exit(1)
+    
+    tracker = CostTracker()
+    
+    if daily:
+        tracker.set_daily_budget(daily)
+    
+    if monthly:
+        tracker.set_monthly_budget(monthly)
+
+
+@cost.command('export')
+@click.argument('format', type=click.Choice(['csv', 'json']))
+@click.argument('output-file', type=click.Path())
+@click.option('--days', type=int, help='Export data from last N days only')
+def cost_export(format: str, output_file: str, days: Optional[int]) -> None:
+    """Export usage data to CSV or JSON format."""
+    tracker = CostTracker()
+    
+    if format == 'csv':
+        tracker.export_csv(output_file, days)
+    elif format == 'json':
+        tracker.export_json(output_file, days)
+
+
+@cost.command('summary')
+@click.option('--days', type=int, default=30, help='Number of days to analyze (default: 30)')
+def cost_summary(days: int) -> None:
+    """Show usage summary for specified period."""
+    tracker = CostTracker()
+    summary = tracker.get_usage_summary(days)
+    
+    click.echo(click.style(f'📊 Usage Summary - Last {days} Days', fg='blue', bold=True))
+    click.echo('=' * 50)
+    click.echo(f'Total API Calls: {summary["total_calls"]}')
+    click.echo(f'Total Cost: ${summary["total_cost"]:.4f}')
+    click.echo(f'Total Input Tokens: {summary["total_input_tokens"]:,}')
+    click.echo(f'Total Output Tokens: {summary["total_output_tokens"]:,}')
+    click.echo(f'Daily Average Cost: ${summary["daily_average"]:.4f}')
+    
+    if summary['by_model']:
+        click.echo(click.style('\n📱 By Model:', fg='cyan'))
+        for model, stats in summary['by_model'].items():
+            model_name = model.replace('claude-3-', '').replace('-20240229', '').replace('-20240307', '').replace('-20241022', '')
+            click.echo(f'   {model_name.title()}: {stats["calls"]} calls, ${stats["cost"]:.4f}')
+    
+    if summary['by_operation']:
+        click.echo(click.style('\n⚙️  By Operation:', fg='cyan'))
+        for operation, stats in summary['by_operation'].items():
+            click.echo(f'   {operation.title()}: {stats["calls"]} calls, ${stats["cost"]:.4f}')
 
 
 def main() -> None:
