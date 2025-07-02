@@ -15,6 +15,9 @@ from resume_customizer.core.prompts import build_orchestrator_prompt
 
 logger = get_logger(__name__)
 
+# Maximum allowed history requests to prevent memory issues
+MAX_HISTORY_REQUESTS_LIMIT = 1000
+
 # Pricing information for Claude models (per 1M tokens)
 CLAUDE_PRICING = {
     "claude-sonnet-4-0": {
@@ -42,7 +45,8 @@ class ClaudeClient:
         
         self.settings = settings
         self.model_name = getattr(settings, 'model_name', 'claude-sonnet-4-0')
-        self.max_history_requests = getattr(settings, 'max_history_requests', 100)
+        # Cap max_history_requests to prevent memory issues
+        self.max_history_requests = min(getattr(settings, 'max_history_requests', 100), MAX_HISTORY_REQUESTS_LIMIT)
         self.usage_stats = {
             "total_input_tokens": 0,
             "total_output_tokens": 0,
@@ -201,17 +205,23 @@ class ClaudeClient:
             self.usage_stats["total_input_tokens"] += request_tokens["input"]
             self.usage_stats["total_output_tokens"] += request_tokens["output"]
             self.usage_stats["total_cost"] += total_cost
-            self.usage_stats["requests"].append({
+            
+            # Add request data with timestamp
+            request_data = {
                 "resume_path": resume_path,
                 "job_path": job_description_path,
                 "input_tokens": request_tokens["input"],
                 "output_tokens": request_tokens["output"],
-                "cost": total_cost
-            })
+                "cost": total_cost,
+                "timestamp": time.time()  # Add timestamp for better tracking
+            }
             
-            # Clean up old requests to prevent memory leak
-            if len(self.usage_stats["requests"]) > self.max_history_requests:
-                self.usage_stats["requests"] = self.usage_stats["requests"][-self.max_history_requests:]
+            # Proactive cleanup before adding to prevent memory leak
+            if len(self.usage_stats["requests"]) >= self.max_history_requests:
+                # Remove oldest requests to make room
+                self.usage_stats["requests"] = self.usage_stats["requests"][-(self.max_history_requests-1):]
+            
+            self.usage_stats["requests"].append(request_data)
             
             logger.info(f"Token usage - Input: {request_tokens['input']:,}, Output: {request_tokens['output']:,}")
             logger.info(f"Request cost: ${total_cost:.4f} (Input: ${input_cost:.4f}, Output: ${output_cost:.4f})")

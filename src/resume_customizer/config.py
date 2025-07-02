@@ -83,19 +83,19 @@ class Settings(BaseSettings):
         description="Timeout for API calls in seconds"
     )
     
-    @field_validator('claude_api_key')
-    def validate_api_key(cls, v: str) -> str:
-        """Validate that API key is not empty."""
-        if not v:
-            raise ValueError("API key cannot be empty")
-        return v
-    
     @field_validator('claude_api_key', mode='before')
-    def check_api_key_exists(cls, v: Optional[str]) -> str:
-        """Check that API key is provided."""
+    def validate_api_key(cls, v: Optional[str]) -> str:
+        """Validate that API key is provided and not empty."""
         if v is None:
             raise ValueError("API key is required")
-        return v
+        
+        if not isinstance(v, str):
+            raise ValueError("API key must be a string")
+        
+        if not v.strip():
+            raise ValueError("API key cannot be empty or whitespace-only")
+        
+        return v.strip()
     
     @field_validator('max_iterations')
     def validate_max_iterations(cls, v: int) -> int:

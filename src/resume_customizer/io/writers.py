@@ -173,13 +173,15 @@ class OutputWriter:
             content: Content to validate
             
         Returns:
-            True if valid, False otherwise
+            True if valid (not None and not whitespace-only), False otherwise
         """
         if content is None:
             return False
         
-        if isinstance(content, str) and len(content) == 0:
-            return False
+        if isinstance(content, str):
+            # Check for empty or whitespace-only strings
+            if len(content.strip()) == 0:
+                return False
         
         return True
     
