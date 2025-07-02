@@ -4,6 +4,7 @@
 import pytest
 from datetime import datetime
 from dataclasses import asdict
+import json
 
 from resume_customizer.models.result import (
     CustomizationResult,
@@ -160,7 +161,6 @@ class TestCustomizationResult:
         """Test exporting result to JSON string."""
         json_str = sample_result.to_json()
         
-        import json
         data = json.loads(json_str)
         
         assert data["match_score"] == 85.5
@@ -175,7 +175,6 @@ class TestCustomizationResult:
         
         assert output_file.exists()
         
-        import json
         with open(output_file) as f:
             data = json.load(f)
         

@@ -5,13 +5,14 @@ import pytest
 from datetime import datetime
 from typing import List, Dict
 
+from resume_customizer.models.resume import Resume, Section
+
 
 class TestResumeModel:
     """Test suite for Resume domain model."""
     
     def test_resume_dataclass_creation(self):
         """Test that Resume dataclass can be created with required fields."""
-        from resume_customizer.models.resume import Resume, Section
         
         sections = [
             Section(name="Summary", content="Experienced developer"),
@@ -34,7 +35,6 @@ class TestResumeModel:
     
     def test_section_dataclass(self):
         """Test Section dataclass."""
-        from resume_customizer.models.resume import Section
         
         section = Section(
             name="Experience",
@@ -48,7 +48,6 @@ class TestResumeModel:
     
     def test_from_markdown_basic_parsing(self):
         """Test parsing basic markdown resume."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 Software Engineer
@@ -86,7 +85,6 @@ BS Computer Science - State University (2018)
     
     def test_section_content_preservation(self):
         """Test that section content preserves formatting."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# Jane Smith
 
@@ -110,7 +108,6 @@ BS Computer Science - State University (2018)
     
     def test_handles_various_section_names(self):
         """Test that parser handles various section naming conventions."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 
@@ -142,7 +139,6 @@ MS Computer Science
     
     def test_extract_contact_info(self):
         """Test extraction of contact information."""
-        from resume_customizer.models.resume import Resume
         
         # Test various contact formats
         test_cases = [
@@ -168,7 +164,6 @@ Contact: john@email.com • 555-123-4567
     
     def test_extract_years_of_experience(self):
         """Test extraction of years of experience."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 
@@ -193,7 +188,6 @@ Software engineer with 8 years of experience in full-stack development.
     
     def test_calculate_experience_from_dates(self):
         """Test calculating experience from work history dates."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 
@@ -213,7 +207,6 @@ Software engineer with 8 years of experience in full-stack development.
     
     def test_extract_skills_list(self):
         """Test extraction of skills from various formats."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 
@@ -234,7 +227,6 @@ Software engineer with 8 years of experience in full-stack development.
     
     def test_skills_extraction_bullet_format(self):
         """Test skills extraction from bullet point format."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 
@@ -253,7 +245,6 @@ Software engineer with 8 years of experience in full-stack development.
     
     def test_validates_required_sections(self):
         """Test validation of required sections."""
-        from resume_customizer.models.resume import Resume
         
         # Missing experience section
         markdown = """# John Doe
@@ -273,7 +264,6 @@ Python, JavaScript
     
     def test_minimal_required_sections(self):
         """Test that resume with minimal required sections validates."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 john@email.com
@@ -295,7 +285,6 @@ Python, JavaScript
     
     def test_empty_markdown_handling(self):
         """Test handling of empty or invalid markdown."""
-        from resume_customizer.models.resume import Resume
         
         with pytest.raises(ValueError, match="Empty or invalid markdown"):
             Resume.from_markdown("")
@@ -305,7 +294,6 @@ Python, JavaScript
     
     def test_no_name_extraction(self):
         """Test handling when name cannot be extracted."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """## Summary
 Software engineer.
@@ -319,7 +307,6 @@ Worked at companies.
     
     def test_get_section_by_name(self):
         """Test getting section by name."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 
@@ -346,7 +333,6 @@ Software Engineer.
     
     def test_section_ordering_preserved(self):
         """Test that section order is preserved from original."""
-        from resume_customizer.models.resume import Resume
         
         markdown = """# John Doe
 

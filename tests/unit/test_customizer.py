@@ -6,6 +6,7 @@ import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from pathlib import Path
 import tempfile
+import os
 
 from resume_customizer.core.customizer import ResumeCustomizer
 from resume_customizer.config import Settings
@@ -236,7 +237,6 @@ class TestResumeCustomizer:
             job_file.write_text("Job content")
             
             # Change to temp directory
-            import os
             old_cwd = os.getcwd()
             os.chdir(tmpdir)
             

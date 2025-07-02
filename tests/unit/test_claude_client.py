@@ -13,6 +13,20 @@ from resume_customizer.config import Settings
 from claude_code_sdk import ClaudeCodeOptions
 
 
+def create_mock_message(content_blocks):
+    """Helper to create a properly formatted mock message."""
+    msg = Mock()
+    msg.content = content_blocks
+    msg.total_cost_usd = 0.001
+    msg.usage = {
+        'input_tokens': 100,
+        'output_tokens': 50,
+        'cache_creation_input_tokens': 0,
+        'cache_read_input_tokens': 0
+    }
+    return msg
+
+
 class TestClaudeClient:
     """Test suite for ClaudeClient class using Claude Code SDK."""
     
@@ -116,17 +130,23 @@ class TestClaudeClient:
         text_block6.text = "Resume customization completed successfully!"
         text_block6.name = None
         
-        messages = [
-            Mock(content=[text_block1]),
-            Mock(content=[tool_block1]),
-            Mock(content=[text_block2]),
-            Mock(content=[tool_block2]),
-            Mock(content=[text_block3]),
-            Mock(content=[text_block4]),
-            Mock(content=[tool_block3]),
-            Mock(content=[text_block5]),
-            Mock(content=[text_block6])
-        ]
+        # Create mock messages with proper attributes
+        messages = []
+        for content in [
+            [text_block1], [tool_block1], [text_block2], 
+            [tool_block2], [text_block3], [text_block4],
+            [tool_block3], [text_block5], [text_block6]
+        ]:
+            msg = Mock()
+            msg.content = content
+            msg.total_cost_usd = 0.001  # Set a small cost value
+            msg.usage = {
+                'input_tokens': 100,
+                'output_tokens': 50,
+                'cache_creation_input_tokens': 0,
+                'cache_read_input_tokens': 0
+            }
+            messages.append(msg)
         
         # Mock query to return our messages
         async def mock_query_generator(*args, **kwargs):
@@ -203,7 +223,7 @@ class TestClaudeClient:
         
         # Mock successful execution
         async def mock_query_generator(*args, **kwargs):
-            yield Mock(content=[Mock(text="Done")])
+            yield create_mock_message([Mock(text="Done", name=None)])
         
         mock_query.return_value = mock_query_generator()
         
@@ -238,9 +258,9 @@ class TestClaudeClient:
         tool3.input = {"path": "output.md", "content": "test"}
         
         messages = [
-            Mock(content=[tool1]),
-            Mock(content=[tool2]),
-            Mock(content=[tool3])
+            create_mock_message([tool1]),
+            create_mock_message([tool2]),
+            create_mock_message([tool3])
         ]
         
         async def mock_query_generator(*args, **kwargs):
@@ -273,7 +293,7 @@ class TestClaudeClient:
         """Test error handling during Claude execution."""
         # Mock an error during execution
         async def mock_query_generator(*args, **kwargs):
-            yield Mock(content=[Mock(text="Starting...")])
+            yield create_mock_message([Mock(text="Starting...", name=None)])
             raise Exception("Claude API error")
         
         mock_query.return_value = mock_query_generator()
@@ -291,7 +311,7 @@ class TestClaudeClient:
     async def test_progress_callback_optional(self, settings, temp_files, mock_query):
         """Test that progress callback is optional."""
         async def mock_query_generator(*args, **kwargs):
-            yield Mock(content=[Mock(text="Done")])
+            yield create_mock_message([Mock(text="Done", name=None)])
         
         mock_query.return_value = mock_query_generator()
         
@@ -312,7 +332,7 @@ class TestClaudeClient:
             
             # Mock query to return minimal response
             async def mock_query_generator(*args, **kwargs):
-                yield Mock(content=[Mock(text="Done")])
+                yield create_mock_message([Mock(text="Done", name=None)])
             
             mock_query.return_value = mock_query_generator()
             
@@ -338,8 +358,8 @@ class TestClaudeClient:
         """Test that output file creation is verified."""
         # Mock messages without writing the file
         messages = [
-            Mock(content=[Mock(text="Processing...")]),
-            Mock(content=[Mock(text="Done")])
+            create_mock_message([Mock(text="Processing...", name=None)]),
+            create_mock_message([Mock(text="Done", name=None)])
         ]
         
         async def mock_query_generator(*args, **kwargs):
