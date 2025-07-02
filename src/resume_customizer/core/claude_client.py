@@ -20,6 +20,11 @@ MAX_HISTORY_REQUESTS_LIMIT = 1000
 
 # Pricing information for Claude models (per 1M tokens)
 CLAUDE_PRICING = {
+    "claude-3-5-sonnet-20241022": {
+        "input": 3.00,   # $3.00 per 1M input tokens
+        "output": 15.00  # $15.00 per 1M output tokens
+    },
+    # Legacy model name for backwards compatibility
     "claude-sonnet-4-0": {
         "input": 3.00,   # $3.00 per 1M input tokens
         "output": 15.00  # $15.00 per 1M output tokens
@@ -44,7 +49,15 @@ class ClaudeClient:
             raise ValueError("Claude API key is required")
         
         self.settings = settings
-        self.model_name = getattr(settings, 'model_name', 'claude-sonnet-4-0')
+        
+        # Validate model exists in pricing dictionary
+        if settings.model not in CLAUDE_PRICING:
+            logger.warning(
+                f"Model '{settings.model}' not found in CLAUDE_PRICING dictionary. "
+                f"Cost calculations may be inaccurate. Supported models: {list(CLAUDE_PRICING.keys())}"
+            )
+        
+        self.model_name = settings.model
         # Cap max_history_requests to prevent memory issues
         self.max_history_requests = min(getattr(settings, 'max_history_requests', 100), MAX_HISTORY_REQUESTS_LIMIT)
         self.usage_stats = {
