@@ -4,13 +4,14 @@
 import pytest
 from typing import List, Set
 
+from resume_customizer.models.job_description import JobDescription
+
 
 class TestJobDescriptionModel:
     """Test suite for JobDescription domain model."""
     
     def test_job_description_dataclass_creation(self):
         """Test that JobDescription dataclass can be created with required fields."""
-        from resume_customizer.models.job_description import JobDescription
         
         job = JobDescription(
             title="Senior Software Engineer",
@@ -34,7 +35,6 @@ class TestJobDescriptionModel:
     
     def test_from_text_basic_parsing(self):
         """Test parsing a basic job description."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Senior Software Engineer
@@ -73,7 +73,6 @@ Responsibilities:
     
     def test_extract_job_title_variations(self):
         """Test extracting job title from various formats."""
-        from resume_customizer.models.job_description import JobDescription
         
         test_cases = [
             # Format 1: Title at top
@@ -92,7 +91,6 @@ Responsibilities:
     
     def test_extract_company_name(self):
         """Test extracting company name from various formats."""
-        from resume_customizer.models.job_description import JobDescription
         
         test_cases = [
             # Format 1: Company label
@@ -111,7 +109,6 @@ Responsibilities:
     
     def test_extract_years_of_experience(self):
         """Test extracting years of experience requirement."""
-        from resume_customizer.models.job_description import JobDescription
         
         test_cases = [
             # Basic patterns
@@ -133,7 +130,6 @@ Responsibilities:
     
     def test_extract_required_skills(self):
         """Test extracting required skills from various sections."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Software Engineer
@@ -165,7 +161,6 @@ Must have:
     
     def test_extract_nice_to_have_skills(self):
         """Test extracting nice-to-have skills."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Backend Developer
@@ -199,7 +194,6 @@ Bonus:
     
     def test_extract_responsibilities(self):
         """Test extracting job responsibilities."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Senior Engineer
@@ -227,7 +221,6 @@ What you'll do:
     
     def test_extract_qualifications(self):
         """Test extracting qualifications and education requirements."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Data Scientist
@@ -252,7 +245,6 @@ Education:
     
     def test_keyword_extraction(self):
         """Test extraction of ATS keywords."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Full Stack Developer
@@ -287,7 +279,6 @@ Requirements:
     
     def test_handles_unstructured_text(self):
         """Test parsing completely unstructured job description."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 We're hiring a Senior Backend Engineer to join our growing team at StartupXYZ!
@@ -318,7 +309,6 @@ If you have a CS degree and experience with AWS, that's even better!
     
     def test_categorize_requirements(self):
         """Test categorization of requirements by importance."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Software Engineer
@@ -346,7 +336,6 @@ Good to have:
     
     def test_skill_normalization(self):
         """Test that skills are normalized for consistency."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = """
 Developer Position
@@ -370,7 +359,6 @@ Required:
     
     def test_empty_text_handling(self):
         """Test handling of empty or invalid text."""
-        from resume_customizer.models.job_description import JobDescription
         
         with pytest.raises(ValueError, match="Empty or invalid job description"):
             JobDescription.from_text("")
@@ -380,7 +368,6 @@ Required:
     
     def test_missing_information_defaults(self):
         """Test that missing information has sensible defaults."""
-        from resume_customizer.models.job_description import JobDescription
         
         job_text = "Software Developer position available."
         
@@ -395,7 +382,6 @@ Required:
     
     def test_validate_method(self):
         """Test validation of job description completeness."""
-        from resume_customizer.models.job_description import JobDescription
         
         # Complete job description
         complete_job = JobDescription(

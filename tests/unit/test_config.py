@@ -6,6 +6,9 @@ import pytest
 from unittest.mock import patch
 from pathlib import Path
 
+from resume_customizer.config import Settings, get_settings
+from pydantic import ValidationError
+
 
 class TestSettings:
     """Test suite for Settings configuration class."""
@@ -93,7 +96,6 @@ RESUME_PRESERVE_FORMATTING=false
         os.chdir(tmp_path)
         
         try:
-            from resume_customizer.config import Settings
             settings = Settings()
             
             assert settings.claude_api_key == 'env-file-api-key'
@@ -121,7 +123,6 @@ RESUME_MAX_ITERATIONS=5
         os.chdir(tmp_path)
         
         try:
-            from resume_customizer.config import Settings
             settings = Settings()
             
             assert settings.claude_api_key == 'env-var-api-key'
@@ -136,7 +137,6 @@ RESUME_MAX_ITERATIONS=5
         os.environ['RESUME_OUTPUT_FORMAT'] = 'pdf'
         os.environ['RESUME_PRESERVE_FORMATTING'] = 'false'
         
-        from resume_customizer.config import Settings
         settings = Settings()
         
         assert settings.max_iterations == 7
@@ -148,7 +148,6 @@ RESUME_MAX_ITERATIONS=5
         os.environ['ANTHROPIC_API_KEY'] = 'test-api-key'
         os.environ['RESUME_MAX_ITERATIONS'] = '0'
         
-        from resume_customizer.config import Settings
         with pytest.raises(ValueError, match="max_iterations must be greater than 0"):
             Settings()
     
@@ -157,16 +156,12 @@ RESUME_MAX_ITERATIONS=5
         os.environ['ANTHROPIC_API_KEY'] = 'test-api-key'
         os.environ['RESUME_OUTPUT_FORMAT'] = 'invalid'
         
-        from resume_customizer.config import Settings
-        from pydantic import ValidationError
         with pytest.raises(ValidationError, match="Input should be"):
             Settings()
     
     def test_get_settings_caches_instance(self, clean_env):
         """Test that get_settings() caches the Settings instance."""
         os.environ['ANTHROPIC_API_KEY'] = 'test-api-key'
-        
-        from resume_customizer.config import get_settings
         
         # Clear any existing cache first
         get_settings.cache_clear()
@@ -178,7 +173,6 @@ RESUME_MAX_ITERATIONS=5
     
     def test_get_settings_cache_can_be_cleared(self, clean_env):
         """Test that get_settings cache can be cleared."""
-        from resume_customizer.config import get_settings
         
         # Clear any existing cache first
         get_settings.cache_clear()

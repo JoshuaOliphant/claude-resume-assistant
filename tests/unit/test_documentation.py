@@ -171,7 +171,7 @@ class TestVersionInformation:
     def test_version_format(self):
         """Test that version follows semantic versioning."""
         # Version should be importable from package
-        from resume_customizer import __version__ as version
+        version = __version__
         
         # Basic semantic version check (X.Y.Z)
         parts = version.split('.')
@@ -193,7 +193,7 @@ class TestVersionInformation:
             pyproject_data = toml.load(pyproject_path)
             pyproject_version = pyproject_data.get("project", {}).get("version", "")
             
-            from resume_customizer import __version__ as package_version
+            package_version = __version__
             
             assert pyproject_version == package_version, \
                 f"Version mismatch: pyproject.toml has '{pyproject_version}', " \
