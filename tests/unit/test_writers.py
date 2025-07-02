@@ -231,6 +231,9 @@ class TestOutputWriter:
         """Test writing empty content."""
         filepath = os.path.join(temp_dir, "empty.md")
         
+        # Verify empty string validation behavior
+        assert writer._validate_content("") is False
+        
         # Empty string is invalid according to _validate_content
         success = writer.write("", filepath)
         

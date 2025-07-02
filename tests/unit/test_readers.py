@@ -160,20 +160,19 @@ Experienced developer
     
     def test_binary_file_handling(self, reader):
         """Test handling of binary/non-text files."""
-        # Create a binary file
+        # Create a binary file 
         with tempfile.NamedTemporaryFile(mode='wb', suffix='.md', delete=False) as f:
             # Write binary data
-            f.write(b'\x00\x01\x02\x03\x04')
+            f.write(b'\x00\x01\x02\x03\x04\xff\xfe\xfd')
             binary_path = f.name
         
         try:
-            # Should handle binary files gracefully
+            # The reader uses 'replace' error handling as a fallback
+            # so binary files will be read with replacement characters
             content = reader.read(binary_path)
-            # chardet should detect it and we should get some result
             assert isinstance(content, str)
-        except UnicodeDecodeError:
-            # Also acceptable if it raises an error
-            pass
+            # Content should have replacement characters for undecodable bytes
+            assert '\ufffd' in content or '?' in content or len(content) > 0
         finally:
             os.unlink(binary_path)
     

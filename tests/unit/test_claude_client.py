@@ -15,6 +15,8 @@ from claude_code_sdk import ClaudeCodeOptions
 
 def create_mock_message(content_blocks):
     """Helper to create a properly formatted mock message."""
+    if not isinstance(content_blocks, list):
+        raise ValueError("content_blocks must be a list")
     msg = Mock()
     msg.content = content_blocks
     msg.total_cost_usd = 0.001
